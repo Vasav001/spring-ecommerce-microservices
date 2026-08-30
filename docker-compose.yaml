@@ -1,0 +1,32 @@
+services:
+    postgres:
+        image: postgres:17.10
+        container_name: ecom-postgres
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+        ports:
+            - "5433:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        container_name: ecom-keycloak
+        command: start-dev
+        environment:
+            KC_BOOTSTRAP_ADMIN_USERNAME: admin
+            KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+            KC_DB: postgres
+            KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+            KC_DB_USERNAME: postgres
+            KC_DB_PASSWORD: postgres
+        ports:
+            - "8080:8080"
+        depends_on:
+            - postgres
+
+volumes:
+    postgres_data:
