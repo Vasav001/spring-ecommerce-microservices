@@ -21,7 +21,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class Customer {
-//  id, AppUser user, phone, additionalPhones, defaultCommunicationPreference(email/sms), active, shipping addresse List, Audit
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

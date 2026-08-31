@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class AppUser {
-//    id, username, email, first/mid/last name, keycloak user id, Customer, Audit
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

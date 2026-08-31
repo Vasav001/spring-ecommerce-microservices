@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 public class ShippingAddress {
-    //  id, Customer, first/last name, comapnyName, address line 1/2/3, city, state, postalcode, country, phone, email, Audit
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

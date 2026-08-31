@@ -1,2 +1,3 @@
 CREATE DATABASE keycloak;
 CREATE DATABASE customer_db;
+CREATE DATABASE catalog_db;
