@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -44,8 +45,12 @@ public class Customer {
     @Column(nullable = false)
     private boolean active = true;
 
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShippingAddress> shippingAddresses = new ArrayList<>();
+
+    @Version
+    private Long version;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

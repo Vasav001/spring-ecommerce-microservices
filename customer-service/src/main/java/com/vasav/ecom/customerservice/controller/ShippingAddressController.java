@@ -3,6 +3,7 @@ package com.vasav.ecom.customerservice.controller;
 import com.vasav.ecom.customerservice.dto.CreateShippingAddressRequest;
 import com.vasav.ecom.customerservice.dto.ShippingAddressDto;
 import com.vasav.ecom.customerservice.dto.UpdateShippingAddressRequest;
+import com.vasav.ecom.customerservice.security.CurrentUser;
 import com.vasav.ecom.customerservice.service.ShippingAddressService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class ShippingAddressController {
     @GetMapping
     @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<List<ShippingAddressDto>> getMyAddresses(@AuthenticationPrincipal Jwt jwt) {
-        List<ShippingAddressDto> response = shippingAddressService.getAddressesForCustomer(jwt.getSubject());
+        List<ShippingAddressDto> response = shippingAddressService.getAddressesForCustomer(CurrentUser.from(jwt));
         return ResponseEntity.ok(response);
     }
 
@@ -35,7 +36,7 @@ public class ShippingAddressController {
     public ResponseEntity<ShippingAddressDto> getMyAddressById(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID addressId) {
-        ShippingAddressDto response = shippingAddressService.getAddressById(jwt.getSubject(), addressId);
+        ShippingAddressDto response = shippingAddressService.getAddressById(CurrentUser.from(jwt), addressId);
         return ResponseEntity.ok(response);
     }
 
@@ -44,7 +45,7 @@ public class ShippingAddressController {
     public ResponseEntity<ShippingAddressDto> addAddress(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateShippingAddressRequest request) {
-        ShippingAddressDto response = shippingAddressService.addAddress(jwt.getSubject(), request);
+        ShippingAddressDto response = shippingAddressService.addAddress(CurrentUser.from(jwt), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -54,7 +55,7 @@ public class ShippingAddressController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID addressId,
             @Valid @RequestBody UpdateShippingAddressRequest request) {
-        ShippingAddressDto response = shippingAddressService.updateAddress(jwt.getSubject(), addressId, request);
+        ShippingAddressDto response = shippingAddressService.updateAddress(CurrentUser.from(jwt), addressId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -63,7 +64,7 @@ public class ShippingAddressController {
     public ResponseEntity<Void> deleteAddress(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID addressId) {
-        shippingAddressService.deleteAddress(jwt.getSubject(), addressId);
+        shippingAddressService.deleteAddress(CurrentUser.from(jwt), addressId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,20 +2,21 @@ package com.vasav.ecom.customerservice.service;
 
 import com.vasav.ecom.customerservice.dto.CustomerResponseDto;
 import com.vasav.ecom.customerservice.dto.UpdateCustomerProfileRequest;
+import com.vasav.ecom.customerservice.entity.Customer;
+import com.vasav.ecom.customerservice.security.CurrentUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.UUID;
 
 public interface CustomerService {
-    CustomerResponseDto getOrCreateCurrentCustomer(Jwt jwt);
+    CustomerResponseDto getOrCreateCurrentCustomer(CurrentUser currentUser);
+
+    Customer getOrCreateCustomerEntity(CurrentUser currentUser);
 
     CustomerResponseDto getCustomerById(UUID customerId);
 
-    CustomerResponseDto getCustomerByKeycloakId(String keycloakUserId);
-
-    CustomerResponseDto updateCustomerProfile(String keycloakUserId, UpdateCustomerProfileRequest request);
+    CustomerResponseDto updateCustomerProfile(CurrentUser currentUser, UpdateCustomerProfileRequest request);
 
     Page<CustomerResponseDto> getAllCustomers(Pageable pageable);
 

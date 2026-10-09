@@ -5,10 +5,14 @@ import com.vasav.ecom.customerservice.dto.ShippingAddressDto;
 import com.vasav.ecom.customerservice.dto.UpdateShippingAddressRequest;
 import com.vasav.ecom.customerservice.entity.Customer;
 import com.vasav.ecom.customerservice.entity.ShippingAddress;
+import com.vasav.ecom.customerservice.exception.BusinessRuleException;
 import com.vasav.ecom.customerservice.exception.ResourceNotFoundException;
+import com.vasav.ecom.customerservice.exception.UnauthorizedAccessException;
 import com.vasav.ecom.customerservice.mapper.ShippingAddressMapper;
 import com.vasav.ecom.customerservice.repository.CustomerRepository;
 import com.vasav.ecom.customerservice.repository.ShippingAddressRepository;
+import com.vasav.ecom.customerservice.security.CurrentUser;
+import com.vasav.ecom.customerservice.service.CustomerService;
 import com.vasav.ecom.customerservice.service.ShippingAddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,60 +25,66 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ShippingAddressServiceImpl implements ShippingAddressService {
 
+    static final int MAX_ADDRESSES_PER_CUSTOMER = 10;
+
     private final ShippingAddressRepository shippingAddressRepository;
     private final CustomerRepository customerRepository;
+    private final CustomerService customerService;
     private final ShippingAddressMapper shippingAddressMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public List<ShippingAddressDto> getAddressesForCustomer(String keycloakUserId) {
-        Customer customer = getCustomerByKeycloakId(keycloakUserId);
-        List<ShippingAddress> addresses = shippingAddressRepository.findByCustomerId(customer.getId());
-        return shippingAddressMapper.toDtoList(addresses);
+    public List<ShippingAddressDto> getAddressesForCustomer(CurrentUser currentUser) {
+        return customerRepository.findByUserKeycloakUserId(currentUser.keycloakUserId())
+                .map(customer -> {
+                    assertActive(customer);
+                    return shippingAddressMapper.toDtoList(shippingAddressRepository.findByCustomerId(customer.getId()));
+                })
+                .orElseGet(List::of);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ShippingAddressDto getAddressById(String keycloakUserId, UUID addressId) {
-        Customer customer = getCustomerByKeycloakId(keycloakUserId);
-        ShippingAddress address = shippingAddressRepository.findByIdAndCustomerId(addressId, customer.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shipping address not found with ID: " + addressId));
-        return shippingAddressMapper.toDto(address);
+    public ShippingAddressDto getAddressById(CurrentUser currentUser, UUID addressId) {
+        return shippingAddressMapper.toDto(findOwnedAddress(currentUser, addressId));
     }
 
     @Override
-    @Transactional
-    public ShippingAddressDto addAddress(String keycloakUserId, CreateShippingAddressRequest request) {
-        Customer customer = getCustomerByKeycloakId(keycloakUserId);
+    public ShippingAddressDto addAddress(CurrentUser currentUser, CreateShippingAddressRequest request) {
+        Customer customer = customerService.getOrCreateCustomerEntity(currentUser);
+        if (shippingAddressRepository.countByCustomerId(customer.getId()) >= MAX_ADDRESSES_PER_CUSTOMER) {
+            throw new BusinessRuleException("A maximum of " + MAX_ADDRESSES_PER_CUSTOMER + " addresses is allowed");
+        }
         ShippingAddress address = shippingAddressMapper.toEntity(request);
         address.setCustomer(customer);
-        ShippingAddress savedAddress = shippingAddressRepository.save(address);
-        return shippingAddressMapper.toDto(savedAddress);
+        return shippingAddressMapper.toDto(shippingAddressRepository.save(address));
     }
 
     @Override
     @Transactional
-    public ShippingAddressDto updateAddress(String keycloakUserId, UUID addressId, UpdateShippingAddressRequest request) {
-        Customer customer = getCustomerByKeycloakId(keycloakUserId);
-        ShippingAddress address = shippingAddressRepository.findByIdAndCustomerId(addressId, customer.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shipping address not found with ID: " + addressId));
-
+    public ShippingAddressDto updateAddress(CurrentUser currentUser, UUID addressId, UpdateShippingAddressRequest request) {
+        ShippingAddress address = findOwnedAddress(currentUser, addressId);
         shippingAddressMapper.updateEntityFromRequest(request, address);
-        ShippingAddress updatedAddress = shippingAddressRepository.save(address);
-        return shippingAddressMapper.toDto(updatedAddress);
+        return shippingAddressMapper.toDto(shippingAddressRepository.save(address));
     }
 
     @Override
     @Transactional
-    public void deleteAddress(String keycloakUserId, UUID addressId) {
-        Customer customer = getCustomerByKeycloakId(keycloakUserId);
-        ShippingAddress address = shippingAddressRepository.findByIdAndCustomerId(addressId, customer.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shipping address not found with ID: " + addressId));
-        shippingAddressRepository.delete(address);
+    public void deleteAddress(CurrentUser currentUser, UUID addressId) {
+        shippingAddressRepository.delete(findOwnedAddress(currentUser, addressId));
     }
 
-    private Customer getCustomerByKeycloakId(String keycloakUserId) {
-        return customerRepository.findByUserKeycloakUserId(keycloakUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer profile not found for keycloak ID: " + keycloakUserId));
+    private ShippingAddress findOwnedAddress(CurrentUser currentUser, UUID addressId) {
+        Customer customer = customerRepository.findByUserKeycloakUserId(currentUser.keycloakUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Shipping address not found with ID: " + addressId));
+        assertActive(customer);
+        return shippingAddressRepository.findByIdAndCustomerId(addressId, customer.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Shipping address not found with ID: " + addressId));
+    }
+
+    private static void assertActive(Customer customer) {
+        if (!customer.isActive()) {
+            throw new UnauthorizedAccessException("Customer account is deactivated");
+        }
     }
 }

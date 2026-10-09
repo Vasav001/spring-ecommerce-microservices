@@ -12,5 +12,5 @@ public interface ShippingAddressRepository extends JpaRepository<ShippingAddress
 
     Optional<ShippingAddress> findByIdAndCustomerId(UUID id, UUID customerId);
 
-    void deleteByIdAndCustomerId(UUID id, UUID customerId);
+    long countByCustomerId(UUID customerId);
 }

@@ -1,5 +1,35 @@
 spring:
     application:
         name: customer-service
+
+    datasource:
+        url: ${DB_URL:jdbc:postgresql://localhost:5433/customer_db}
+        username: ${DB_USERNAME:postgres}
+        password: ${DB_PASSWORD:postgres}
+        driver-class-name: org.postgresql.Driver
+
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: validate
+
+    flyway:
+        enabled: true
+        locations:
+            - classpath:db/migration
+        validate-on-migrate: true
+
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ecom-realm}
+
 server:
     port: 8081
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: health,info

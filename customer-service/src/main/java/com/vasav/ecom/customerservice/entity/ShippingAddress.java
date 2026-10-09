@@ -61,6 +61,9 @@ public class ShippingAddress {
     @Column
     private String email;
 
+    @Version
+    private Long version;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

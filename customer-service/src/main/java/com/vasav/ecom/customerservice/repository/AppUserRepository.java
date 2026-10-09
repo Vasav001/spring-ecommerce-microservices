@@ -12,10 +12,4 @@ public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
     Optional<AppUser> findByEmail(String email);
 
     Optional<AppUser> findByUsername(String username);
-
-    boolean existsByKeycloakUserId(String keycloakUserId);
-
-    boolean existsByEmail(String email);
-
-    boolean existsByUsername(String username);
 }

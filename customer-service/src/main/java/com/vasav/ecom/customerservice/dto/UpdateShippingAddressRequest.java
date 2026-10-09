@@ -45,6 +45,7 @@ public record UpdateShippingAddressRequest(
         @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Invalid phone number format")
         String phone,
 
+        @Size(max = 255, message = "Email must not exceed 255 characters")
         @Email(message = "Invalid email format")
         String email
 ) {}

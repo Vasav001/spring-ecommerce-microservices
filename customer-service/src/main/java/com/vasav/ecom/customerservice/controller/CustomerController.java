@@ -2,6 +2,7 @@ package com.vasav.ecom.customerservice.controller;
 
 import com.vasav.ecom.customerservice.dto.CustomerResponseDto;
 import com.vasav.ecom.customerservice.dto.UpdateCustomerProfileRequest;
+import com.vasav.ecom.customerservice.security.CurrentUser;
 import com.vasav.ecom.customerservice.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class CustomerController {
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<CustomerResponseDto> getCurrentCustomer(@AuthenticationPrincipal Jwt jwt) {
-        CustomerResponseDto response = customerService.getOrCreateCurrentCustomer(jwt);
+        CustomerResponseDto response = customerService.getOrCreateCurrentCustomer(CurrentUser.from(jwt));
         return ResponseEntity.ok(response);
     }
 
@@ -35,7 +36,7 @@ public class CustomerController {
     public ResponseEntity<CustomerResponseDto> updateCurrentCustomerProfile(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody UpdateCustomerProfileRequest request) {
-        CustomerResponseDto response = customerService.updateCustomerProfile(jwt.getSubject(), request);
+        CustomerResponseDto response = customerService.updateCustomerProfile(CurrentUser.from(jwt), request);
         return ResponseEntity.ok(response);
     }
 

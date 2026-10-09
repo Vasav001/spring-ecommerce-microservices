@@ -1,16 +1,15 @@
 package com.vasav.ecom.customerservice.service.impl;
 
 import com.vasav.ecom.customerservice.entity.AppUser;
-import com.vasav.ecom.customerservice.exception.ResourceNotFoundException;
+import com.vasav.ecom.customerservice.exception.DuplicateResourceException;
 import com.vasav.ecom.customerservice.repository.AppUserRepository;
+import com.vasav.ecom.customerservice.security.CurrentUser;
 import com.vasav.ecom.customerservice.service.AppUserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,84 +19,60 @@ public class AppUserServiceImpl implements AppUserService {
 
     @Override
     @Transactional
-    public AppUser syncWithKeycloak(Jwt jwt) {
-        String keycloakUserId = jwt.getSubject();
-        String username = jwt.getClaimAsString("preferred_username");
-        if (username == null || username.isBlank()) {
-            username = keycloakUserId;
+    public AppUser syncWithKeycloak(CurrentUser currentUser) {
+        String keycloakUserId = currentUser.keycloakUserId();
+        String username = orDefault(currentUser.username(), keycloakUserId);
+        String email = orDefault(currentUser.email(), username + "@local.dev");
+        String firstName = orDefault(currentUser.firstName(), username);
+        String lastName = orDefault(currentUser.lastName(), username);
+        String middleName = currentUser.middleName();
+
+        AppUser user = appUserRepository.findByKeycloakUserId(keycloakUserId).orElse(null);
+
+        if (user == null) {
+            assertUnique(username, email, null);
+            user = new AppUser();
+            user.setKeycloakUserId(keycloakUserId);
+            apply(user, username, email, firstName, middleName, lastName);
+            return appUserRepository.save(user);
         }
 
-        String email = jwt.getClaimAsString("email");
-        if (email == null || email.isBlank()) {
-            email = username + "@local.dev";
+        boolean modified = !Objects.equals(user.getUsername(), username)
+                || !Objects.equals(user.getEmail(), email)
+                || !Objects.equals(user.getFirstName(), firstName)
+                || !Objects.equals(user.getMiddleName(), middleName)
+                || !Objects.equals(user.getLastName(), lastName);
+        if (!modified) {
+            return user;
         }
+        assertUnique(username, email, user);
+        apply(user, username, email, firstName, middleName, lastName);
+        return appUserRepository.save(user);
+    }
 
-        String firstName = jwt.getClaimAsString("given_name");
-        if (firstName == null || firstName.isBlank()) {
-            firstName = username;
-        }
-
-        String lastName = jwt.getClaimAsString("family_name");
-        if (lastName == null || lastName.isBlank()) {
-            lastName = username;
-        }
-
-        String middleName = jwt.getClaimAsString("middle_name");
-
-        final String finalUsername = username;
-        final String finalEmail = email;
-        final String finalFirstName = firstName;
-        final String finalLastName = lastName;
-        final String finalMiddleName = middleName;
-
-        return appUserRepository.findByKeycloakUserId(keycloakUserId)
-                .map(existingUser -> {
-                    boolean modified = false;
-                    if (!Objects.equals(existingUser.getUsername(), finalUsername)) {
-                        existingUser.setUsername(finalUsername);
-                        modified = true;
-                    }
-                    if (!Objects.equals(existingUser.getEmail(), finalEmail)) {
-                        existingUser.setEmail(finalEmail);
-                        modified = true;
-                    }
-                    if (!Objects.equals(existingUser.getFirstName(), finalFirstName)) {
-                        existingUser.setFirstName(finalFirstName);
-                        modified = true;
-                    }
-                    if (!Objects.equals(existingUser.getLastName(), finalLastName)) {
-                        existingUser.setLastName(finalLastName);
-                        modified = true;
-                    }
-                    if (!Objects.equals(existingUser.getMiddleName(), finalMiddleName)) {
-                        existingUser.setMiddleName(finalMiddleName);
-                        modified = true;
-                    }
-                    return modified ? appUserRepository.save(existingUser) : existingUser;
-                })
-                .orElseGet(() -> {
-                    AppUser newUser = new AppUser();
-                    newUser.setKeycloakUserId(keycloakUserId);
-                    newUser.setUsername(finalUsername);
-                    newUser.setEmail(finalEmail);
-                    newUser.setFirstName(finalFirstName);
-                    newUser.setLastName(finalLastName);
-                    newUser.setMiddleName(finalMiddleName);
-                    return appUserRepository.save(newUser);
+    private void assertUnique(String username, String email, AppUser self) {
+        appUserRepository.findByUsername(username)
+                .filter(other -> self == null || !other.getId().equals(self.getId()))
+                .ifPresent(other -> {
+                    throw new DuplicateResourceException("Username already in use: " + username);
+                });
+        appUserRepository.findByEmail(email)
+                .filter(other -> self == null || !other.getId().equals(self.getId()))
+                .ifPresent(other -> {
+                    throw new DuplicateResourceException("Email already in use: " + email);
                 });
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public AppUser getByKeycloakUserId(String keycloakUserId) {
-        return appUserRepository.findByKeycloakUserId(keycloakUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with keycloak ID: " + keycloakUserId));
+    private static void apply(AppUser user, String username, String email, String firstName,
+                              String middleName, String lastName) {
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setMiddleName(middleName);
+        user.setLastName(lastName);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public AppUser getById(UUID id) {
-        return appUserRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+    private static String orDefault(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
     }
 }
