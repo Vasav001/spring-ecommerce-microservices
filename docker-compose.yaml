@@ -1,6 +1,6 @@
 services:
     postgres:
-        image: postgres:17.10
+        image: postgres:17.10-alpine
         container_name: ecom-postgres
         environment:
             POSTGRES_USER: postgres
@@ -13,9 +13,9 @@ services:
             - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
     keycloak:
-        image: quay.io/keycloak/keycloak:latest
+        image: quay.io/keycloak/keycloak:26.8.0
         container_name: ecom-keycloak
-        command: start-dev --import-realm
+        command: start-dev # --import-realm
         environment:
             KC_BOOTSTRAP_ADMIN_USERNAME: admin
             KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -27,8 +27,21 @@ services:
             - "8080:8080"
         depends_on:
             - postgres
-        volumes:
-            - ./docker/keycloak:/opt/keycloak/data/import
+#        volumes:
+#            - ./docker/keycloak:/opt/keycloak/data/import
+
+    kafka:
+        image: apache/kafka-native:4.3.1
+        container_name: ecom-kafka
+        ports:
+            - "9092:9092"
+
+    redis:
+        image: redis:7-alpine
+        container_name: ecom-redis
+        command: [ "redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru" ]
+        ports:
+            - "6379:6379"
 
 volumes:
     postgres_data:
