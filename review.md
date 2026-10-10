@@ -1,0 +1,1 @@
+## Kafka msg envelope [link](https://www.confluent.io/blog/spring-kafka-protobuf-part-1-event-data-modeling/)
