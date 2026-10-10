@@ -23,7 +23,7 @@ spring:
         oauth2:
             resourceserver:
                 jwt:
-                    issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/ecom-realm}
+                    issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ecom-realm}
 
 server:
     port: 8081
