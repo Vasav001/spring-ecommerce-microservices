@@ -81,14 +81,16 @@ CREATE TABLE purchase
 
 CREATE TABLE outbox_event
 (
-    id           uuid PRIMARY KEY,             -- envelope eventId
-    seq          bigserial    NOT NULL UNIQUE, -- publish order
-    aggregate_id varchar(255) NOT NULL,        -- kafka msg key used for same partitioning
-    topic        varchar(255) NOT NULL,
-    event_type   varchar(255) NOT NULL,
-    payload      jsonb        NOT NULL,        -- envelope
-    created_at   timestamptz  NOT NULL DEFAULT now(),
-    published_at timestamptz                   -- null means pending
+    id             uuid PRIMARY KEY,             -- eventId
+    seq            bigserial    NOT NULL UNIQUE, -- publish order
+    aggregate_id   varchar(255) NOT NULL,        -- kafka msg key used for same partitioning
+    topic          varchar(255) NOT NULL,
+    event_type     varchar(255) NOT NULL,
+    event_version   int          NOT NULL DEFAULT 1,
+    correlation_id varchar(255),
+    payload        TEXT         NOT NULL,
+    created_at     timestamptz  NOT NULL DEFAULT now(),
+    published_at   timestamptz                   -- null means pending
 );
 CREATE INDEX idx_outbox_pending ON outbox_event (seq) WHERE published_at IS NULL;
 
@@ -96,7 +98,7 @@ CREATE INDEX idx_outbox_pending ON outbox_event (seq) WHERE published_at IS NULL
 CREATE TABLE processed_event
 (
     consumer     varchar(255) NOT NULL, -- handler name, for multiple consumer
-    event_id     uuid        NOT NULL,
-    processed_at timestamptz NOT NULL DEFAULT now(),
+    event_id     uuid         NOT NULL,
+    processed_at timestamptz  NOT NULL DEFAULT now(),
     PRIMARY KEY (consumer, event_id)
 );

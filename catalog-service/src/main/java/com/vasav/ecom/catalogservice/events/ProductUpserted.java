@@ -1,4 +1,4 @@
-package com.vasav.ecom.catalogservice.messaging.events;
+package com.vasav.ecom.catalogservice.events;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

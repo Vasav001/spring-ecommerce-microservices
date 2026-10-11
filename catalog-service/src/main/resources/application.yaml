@@ -26,8 +26,15 @@ spring:
                     issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ecom-realm}
 
     kafka:
-        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
         client-id: ${spring.application.name}
+        properties:
+            security:
+                protocol: SASL_SSL
+            sasl:
+                mechanism: PLAIN
+                jaas:
+                    config: org.apache.kafka.common.security.plain.PlainLoginModule required username='${CLUSTER_API_KEY}' password='${CLUSTER_API_SECRET}';
         producer:
             key-serializer: org.apache.kafka.common.serialization.StringSerializer
             value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -42,6 +49,7 @@ spring:
                 max.block.ms: 5000
                 linger.ms: 5
         consumer:
+#            group-id: catalog-service-group
             key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             enable-auto-commit: false
@@ -59,9 +67,12 @@ spring:
             modify-topic-configs: true
 
 app:
-    kafka:
-        partitions: 6
-        replicas: 1
+    #    kafka:
+    #        partitions: 6
+    #        replicas: 1
+    outbox:
+        poll-ms: 2000
+        batch-size: 3
 
 server:
     port: 8082
