@@ -26,12 +26,42 @@ spring:
                     issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ecom-realm}
 
     kafka:
-        bootstrap-servers: localhost:9092
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+        client-id: ${spring.application.name}
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+            acks: all
+            batch-size: 32KB
+            compression-type: lz4
+            properties:
+                enable.idempotence: true
+                max.in.flight.requests.per.connection: 5
+                delivery.timeout.ms: 30000
+                request.timeout.ms: 10000
+                max.block.ms: 5000
+                linger.ms: 5
         consumer:
-            group-id: test-consumer-group
-            auto-offset-reset: earliest
             key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            enable-auto-commit: false
+            auto-offset-reset: earliest
+            max-poll-records: 50
+            properties:
+                max.poll.interval.ms: 300000
+                partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor
+        listener:
+            ack-mode: record
+            concurrency: 3
+        admin:
+            auto-create: true
+            fail-fast: false
+            modify-topic-configs: true
+
+app:
+    kafka:
+        partitions: 6
+        replicas: 1
 
 server:
     port: 8082

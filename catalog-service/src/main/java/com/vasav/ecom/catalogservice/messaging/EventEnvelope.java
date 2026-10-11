@@ -1,4 +1,4 @@
-package com.vasav.ecom.catalogservice.dto;
+package com.vasav.ecom.catalogservice.messaging;
 
 import java.time.Instant;
 import java.util.UUID;
