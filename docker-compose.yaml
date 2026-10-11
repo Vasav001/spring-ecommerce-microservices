@@ -27,17 +27,59 @@ services:
             - "8080:8080"
         depends_on:
             - postgres
+    #        volumes:
+    #            - ./docker/keycloak:/opt/keycloak/data/import
+
+#    kafka:
+#        image: apache/kafka-native:4.3.1
+#        container_name: ecom-kafka-broker
+#        ports:
+#            - "9092:9092"
+#        environment:
+#            KAFKA_NODE_ID: 1
+#            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+#            KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
+#            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # 1 cuz only 1 broker here, __consumer_offset internal topic
+#            KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0 # 0 cuz fast while dev
+#            KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1 # no sync needed since 1 broker
+#            KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 # no other broker to keep replica
+#            KAFKA_PROCESS_ROLES: 'broker,controller'
+#            KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
+#            KAFKA_LISTENERS: 'PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093'
+#            KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+#            KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+#            KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+#        #            KAFKA_NUM_PARTITIONS: 3
 #        volumes:
-#            - ./docker/keycloak:/opt/keycloak/data/import
+#            - kafka_data:/var/lib/kafka/data
+#            - kafka_secrets:/etc/kafka/secrets
+
 
     kafka:
         image: apache/kafka-native:4.3.1
-        container_name: ecom-kafka
+        container_name: ecom-kafka-broker
         ports:
-            - "9092:9092"
+            - 9092:9092
+        environment:
+            KAFKA_NODE_ID: 1
+            KAFKA_PROCESS_ROLES: broker,controller
+            KAFKA_LISTENERS: PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+            KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+            KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+            KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+        volumes:
+        - kafka_data:/tmp/kraft-combined-logs
+        - kafka_secrets:/etc/kafka/secrets
+        - kafka_config:/mnt/shared/config
+
 
     redis:
-        image: redis:7-alpine
+        image: redis:8.10.2-alpine
         container_name: ecom-redis
         command: [ "redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru" ]
         ports:
@@ -45,3 +87,6 @@ services:
 
 volumes:
     postgres_data:
+    kafka_data:
+    kafka_secrets:
+    kafka_config:
