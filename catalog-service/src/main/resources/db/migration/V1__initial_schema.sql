@@ -1,14 +1,14 @@
 /*
 
  tables:
-
- product, (product info, used by admin and other services; no user access)
- review, (comments, ratings)
- product_rating, (rating out of 5 for every product; calculated as avg rating i.e sum / total ratings)
- purchase (used to verity if customer can add review)
+    product, (product info, used by admin and other services; no user access)
+    review, (comments, ratings)
+    product_rating, (rating out of 5 for every product; calculated as avg rating i.e sum / total ratings)
+    purchase (used to verity if customer can add review)
 
  other tables:
-
+    outbox_event, (transactional outbox)
+    processed_event (consumer idempotency)
 
  */
 
@@ -76,4 +76,27 @@ CREATE TABLE purchase
     order_id   uuid         NOT NULL,
     created_at timestamptz  NOT NULL,
     PRIMARY KEY (user_id, product_id)
+);
+
+
+CREATE TABLE outbox_event
+(
+    id           uuid PRIMARY KEY,             -- envelope eventId
+    seq          bigserial    NOT NULL UNIQUE, -- publish order
+    aggregate_id varchar(255) NOT NULL,        -- kafka msg key used for same partitioning
+    topic        varchar(255) NOT NULL,
+    event_type   varchar(255) NOT NULL,
+    payload      jsonb        NOT NULL,        -- envelope
+    created_at   timestamptz  NOT NULL DEFAULT now(),
+    published_at timestamptz                   -- null means pending
+);
+CREATE INDEX idx_outbox_pending ON outbox_event (seq) WHERE published_at IS NULL;
+
+
+CREATE TABLE processed_event
+(
+    consumer     varchar(255) NOT NULL, -- handler name, for multiple consumer
+    event_id     uuid        NOT NULL,
+    processed_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (consumer, event_id)
 );
