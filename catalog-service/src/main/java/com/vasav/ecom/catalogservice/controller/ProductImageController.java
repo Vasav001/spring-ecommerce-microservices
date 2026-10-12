@@ -7,6 +7,7 @@ import com.vasav.ecom.catalogservice.util.image.UploadInstruction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,6 +30,7 @@ public class ProductImageController {
     @Value("${app.images.max-bytes}")
     private long maxBytes;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/upload-url")
     public UploadInstruction uploadUrl(@PathVariable UUID productId, @RequestBody UploadUrlRequest request) {
         String ext = EXTENSIONS.get(request.contentType());
