@@ -49,7 +49,7 @@ spring:
                 max.block.ms: 5000
                 linger.ms: 5
         consumer:
-#            group-id: catalog-service-group
+            #            group-id: catalog-service-group
             key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             enable-auto-commit: false
@@ -73,6 +73,17 @@ app:
     outbox:
         poll-ms: 2000
         batch-size: 3
+    storage:
+        provider: cloudinary
+        cloudinary:
+            cloud-name: ${CLOUDINARY_CLOUD_NAME}
+            api-key: ${CLOUDINARY_API_KEY}
+            api-secret: ${CLOUDINARY_API_SECRET}
+    images:
+        max-per-product: 10
+        max-bytes: 5242880
+        base-urls:
+            cloudinary: https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload
 
 server:
     port: 8082
