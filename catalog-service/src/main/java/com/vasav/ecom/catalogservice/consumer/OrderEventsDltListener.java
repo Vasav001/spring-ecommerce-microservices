@@ -39,7 +39,7 @@ public class OrderEventsDltListener {
     @KafkaListener(topics = KafkaTopics.ORDER_EVENTS_DLT, groupId = KafkaTopics.GROUP_ORDERS + ".dlt")
     public void onDeadLetter(ConsumerRecord<String, String> record) {
         try {
-            log.error("Dead letter: originalTopic={} partition={} offset={} key={} eventId={} eventType={} exception={} message={}",
+            log.error("Dead letter: originalTopic={} partition={} offset={} key={} eventId={} eventType={} exception={} cause={} message={}",
                     text(record, KafkaHeaders.DLT_ORIGINAL_TOPIC),
                     intHeader(record, KafkaHeaders.DLT_ORIGINAL_PARTITION),
                     longHeader(record, KafkaHeaders.DLT_ORIGINAL_OFFSET),
@@ -47,6 +47,7 @@ public class OrderEventsDltListener {
                     text(record, EventHeaders.EVENT_ID),
                     text(record, EventHeaders.EVENT_TYPE),
                     text(record, KafkaHeaders.DLT_EXCEPTION_FQCN),
+                    text(record, KafkaHeaders.DLT_EXCEPTION_CAUSE_FQCN),
                     text(record, KafkaHeaders.DLT_EXCEPTION_MESSAGE));
 
             meterRegistry.counter("kafka_dlt_messages_total", "topic", KafkaTopics.ORDER_EVENTS).increment();

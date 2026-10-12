@@ -5,7 +5,8 @@ import com.vasav.ecom.catalogservice.entity.Review;
 import com.vasav.ecom.catalogservice.entity.enums.ProductStatus;
 import com.vasav.ecom.catalogservice.entity.enums.ReviewStatus;
 import com.vasav.ecom.catalogservice.events.KafkaTopics;
-import com.vasav.ecom.catalogservice.exception.ProductNotFoundException;
+import com.vasav.ecom.catalogservice.events.ProductRatingChanged;
+import com.vasav.ecom.catalogservice.exception.*;
 import com.vasav.ecom.catalogservice.outbox.OutboxWriter;
 import com.vasav.ecom.catalogservice.repository.ProductRatingRepository;
 import com.vasav.ecom.catalogservice.repository.ProductRepository;
@@ -42,10 +43,10 @@ public class ReviewServiceImpl implements ReviewService {
         UUID productId = request.productId();
         requireActiveProduct(productId);
         if (!purchaseService.hasPurchased(user.subject(), productId)) {
-            throw new RuntimeException();
+            throw new NotVerifiedPurchaseException(productId);
         }
         if (reviews.existsByProductIdAndUserId(productId, user.subject())) {
-            throw new RuntimeException();
+            throw new AlreadyReviewedException(productId);
         }
 
         Review review = new Review();
@@ -60,7 +61,7 @@ public class ReviewServiceImpl implements ReviewService {
         try {
             saved = reviews.saveAndFlush(review);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException();
+            throw new AlreadyReviewedException(productId);   // lost a race on UNIQUE (product_id, user_id)
         }
 
         publish(ratings.addRating(productId, saved.getRating()));
@@ -73,7 +74,7 @@ public class ReviewServiceImpl implements ReviewService {
         Review review = findPublished(reviewId);
         requireAuthor(review, user);
         if (review.getVersion() != expectedVersion) {
-            throw new RuntimeException();
+            throw new VersionMismatchException();
         }
 
         int delta = request.rating() - review.getRating();
@@ -90,7 +91,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public void delete(UUID reviewId, CurrentUser user) {
-        Review review = reviews.findById(reviewId).orElseThrow(() -> new RuntimeException(String.valueOf(reviewId)));
+        Review review = reviews.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
         requireAuthor(review, user);
         hideIfPublished(review);
     }
@@ -98,7 +99,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public void hide(UUID reviewId) {
-        Review review = reviews.findById(reviewId).orElseThrow(() -> new RuntimeException(String.valueOf(reviewId)));
+        Review review = reviews.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException(reviewId));
         hideIfPublished(review);
     }
 
@@ -133,12 +134,12 @@ public class ReviewServiceImpl implements ReviewService {
     private Review findPublished(UUID reviewId) {
         return reviews.findById(reviewId)
                 .filter(r -> r.getStatus() == ReviewStatus.PUBLISHED)
-                .orElseThrow(() -> new RuntimeException(String.valueOf(reviewId)));
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
     }
 
     private void requireAuthor(Review review, CurrentUser user) {
         if (!review.getUserId().equals(user.subject())) {
-            throw new RuntimeException();
+            throw new NotReviewAuthorException();
         }
     }
 

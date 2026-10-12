@@ -3,14 +3,13 @@ package com.vasav.ecom.catalogservice.repository;
 import com.vasav.ecom.catalogservice.dto.review.RatingSnapshot;
 import com.vasav.ecom.catalogservice.entity.ProductRating;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.UUID;
 
 public interface ProductRatingRepository extends JpaRepository<ProductRating, UUID> {
 
-    @Modifying
+    // no @Modifying: RETURNING makes these result-producing queries (@Modifying only allows void/int/long)
     @Query(value = """
             INSERT INTO product_rating (product_id, rating_count, rating_sum, version, updated_at)
             VALUES (:productId, 1, :rating, 1, now())
@@ -23,7 +22,6 @@ public interface ProductRatingRepository extends JpaRepository<ProductRating, UU
             """, nativeQuery = true)
     RatingSnapshot addRating(UUID productId, int rating);
 
-    @Modifying
     @Query(value = """
             UPDATE product_rating
                SET rating_count = rating_count + :countDelta,

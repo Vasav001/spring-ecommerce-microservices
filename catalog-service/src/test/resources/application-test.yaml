@@ -1,0 +1,35 @@
+# Test profile: everything external is replaced. Postgres and Kafka come from Testcontainers
+# (@ServiceConnection overrides the URLs below). All secrets here are dummies.
+spring:
+    datasource:
+        # deliberately unusable: if the Testcontainers connection were ever not applied,
+        # tests fail instead of touching the real catalog_db
+        url: jdbc:postgresql://service-connection-not-applied.invalid:1/none
+
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:1/realms/test   # never contacted, MockMvc uses jwt()
+
+    kafka:
+        bootstrap-servers: service-connection-not-applied.invalid:9092
+        properties:
+            "[security.protocol]": PLAINTEXT
+
+# resolves the SASL placeholders in application.yaml (unused with PLAINTEXT)
+CLUSTER_API_KEY: test-key
+CLUSTER_API_SECRET: test-secret
+
+app:
+    outbox:
+        poll-ms: 100
+        batch-size: 50
+    storage:
+        cloudinary:
+            cloud-name: test-cloud
+            api-key: test-api-key
+            api-secret: test-api-secret
+    images:
+        base-urls:
+            cloudinary: https://res.cloudinary.com/test-cloud/image/upload

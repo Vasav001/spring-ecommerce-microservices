@@ -29,7 +29,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    // TODO corellation
     private static final String PRODUCT_UPSERTED = "ProductUpserted";
 
     private final ProductRepository products;
