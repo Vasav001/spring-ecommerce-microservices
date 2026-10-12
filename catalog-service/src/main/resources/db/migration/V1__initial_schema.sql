@@ -22,6 +22,7 @@ CREATE TABLE product
     brand       varchar(100),
     category    varchar(100)   NOT NULL,
     price       numeric(12, 2) NOT NULL CHECK (price >= 0),
+    image_refs  text[]         NOT NULL DEFAULT '{}',
     status      varchar(16)    NOT NULL CHECK (status IN ('DRAFT', 'ACTIVE', 'ARCHIVED')),
 --     draft is incomplete product, archived is histpry/soft delete, customers only see active products
     version     bigint         NOT NULL,
@@ -86,7 +87,7 @@ CREATE TABLE outbox_event
     aggregate_id   varchar(255) NOT NULL,        -- kafka msg key used for same partitioning
     topic          varchar(255) NOT NULL,
     event_type     varchar(255) NOT NULL,
-    event_version   int          NOT NULL DEFAULT 1,
+    event_version  int          NOT NULL DEFAULT 1,
     correlation_id varchar(255),
     payload        TEXT         NOT NULL,
     created_at     timestamptz  NOT NULL DEFAULT now(),
