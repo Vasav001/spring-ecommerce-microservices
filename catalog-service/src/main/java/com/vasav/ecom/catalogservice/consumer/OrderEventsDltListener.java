@@ -1,6 +1,6 @@
 package com.vasav.ecom.catalogservice.consumer;
 
-import com.vasav.ecom.catalogservice.config.KafkaTopics;
+import com.vasav.ecom.catalogservice.events.KafkaTopics;
 import com.vasav.ecom.catalogservice.events.EventHeaders;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;

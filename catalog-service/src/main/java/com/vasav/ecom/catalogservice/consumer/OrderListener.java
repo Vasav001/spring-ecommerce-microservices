@@ -1,6 +1,6 @@
 package com.vasav.ecom.catalogservice.consumer;
 
-import com.vasav.ecom.catalogservice.config.KafkaTopics;
+import com.vasav.ecom.catalogservice.events.KafkaTopics;
 import com.vasav.ecom.catalogservice.events.EventHeaders;
 import com.vasav.ecom.catalogservice.events.OrderDelivered;
 import com.vasav.ecom.catalogservice.exception.UnknownEventVersionException;

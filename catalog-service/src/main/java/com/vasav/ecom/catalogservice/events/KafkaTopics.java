@@ -1,4 +1,4 @@
-package com.vasav.ecom.catalogservice.config;
+package com.vasav.ecom.catalogservice.events;
 
 public final class KafkaTopics {
     //    dummy: hello
