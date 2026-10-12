@@ -12,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,6 +39,7 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminProductResponse> put(
             @PathVariable UUID productId,
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch,
@@ -56,12 +58,14 @@ public class ProductController {
                 "Send If-None-Match: * to create or If-Match: \"<version>\" to update");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{productId}")
     public ResponseEntity<AdminProductResponse> get(@PathVariable UUID productId) {
         AdminProductResponse product = productService.get(productId);
         return ResponseEntity.ok().eTag(etag(product)).body(product);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public PagedModel<AdminProductResponse> getAll(
             @RequestParam(required = false) ProductStatus status,
