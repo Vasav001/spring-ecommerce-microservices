@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -21,7 +22,7 @@ import java.util.Objects;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // realm_access.roles is keyclaok specific. different idp may have different roles
+    // realm_access.roles is keycloak specific. different idp may have different roles
     static Collection<GrantedAuthority> extractRoles(Jwt jwt) {
         Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
         if (realmAccess == null || !(realmAccess.get("roles") instanceof Collection<?> roles)) {
@@ -37,10 +38,11 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt

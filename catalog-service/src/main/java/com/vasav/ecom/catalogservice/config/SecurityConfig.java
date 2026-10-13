@@ -22,7 +22,7 @@ import java.util.Objects;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // realm_access.roles is keyclaok specific. different idp may have different roles
+    // realm_access.roles is keycloak specific. different idp may have different roles
     static Collection<GrantedAuthority> extractRoles(Jwt jwt) {
         Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
         if (realmAccess == null || !(realmAccess.get("roles") instanceof Collection<?> roles)) {

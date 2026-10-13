@@ -18,4 +18,13 @@ public record CurrentUser(
                 jwt.getClaimAsString(StandardClaimNames.FAMILY_NAME)
         );
     }
+
+    public String displayName() {
+        if (firstName != null && !firstName.isBlank()) {
+            return lastName == null || lastName.isBlank()
+                    ? firstName
+                    : firstName + " " + lastName.charAt(0) + ".";
+        }
+        return "Customer";
+    }
 }
