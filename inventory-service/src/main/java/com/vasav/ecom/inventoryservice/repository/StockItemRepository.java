@@ -1,14 +1,22 @@
 package com.vasav.ecom.inventoryservice.repository;
 
 import com.vasav.ecom.inventoryservice.entity.StockItem;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select s from StockItem s where s.productId in :productIds order by s.productId")
+    List<StockItem> lockAll(@Param("productIds") Collection<UUID> productIds);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""

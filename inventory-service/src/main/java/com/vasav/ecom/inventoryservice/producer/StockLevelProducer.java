@@ -1,5 +1,6 @@
 package com.vasav.ecom.inventoryservice.producer;
 
+import com.vasav.ecom.inventoryservice.entity.StockItem;
 import com.vasav.ecom.inventoryservice.events.EventTypes;
 import com.vasav.ecom.inventoryservice.events.KafkaTopics;
 import com.vasav.ecom.inventoryservice.events.StockLevelChanged;
@@ -25,9 +26,9 @@ public class StockLevelProducer {
 
     //  runs the stock change, then sends StockLevelChanged only for products that went in / out of stock
     public <T> T publishOnFlip(Collection<UUID> productIds, Supplier<T> change) {
-        Set<UUID> inStockBefore = inStock(productIds);
+        Set<UUID> inStockBefore = inStock(stockItemRepository.lockAll(productIds));
         T result = change.get();
-        Set<UUID> inStockAfter = inStock(productIds);
+        Set<UUID> inStockAfter = inStock(stockItemRepository.findAllById(productIds));
         for (UUID productId : productIds) {
             boolean inStock = inStockAfter.contains(productId);
             // check flip
@@ -42,9 +43,9 @@ public class StockLevelProducer {
         return result;
     }
 
-    private Set<UUID> inStock(Collection<UUID> productIds) {
+    private Set<UUID> inStock(Iterable<StockItem> items) {
         Set<UUID> result = new HashSet<>();
-        stockItemRepository.findAllById(productIds).forEach(i -> {
+        items.forEach(i -> {
             if (i.available() > 0) {
                 result.add(i.getProductId());
             }
