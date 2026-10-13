@@ -1,5 +1,6 @@
 package com.vasav.ecom.inventoryservice.service;
 
+import com.vasav.ecom.inventoryservice.dto.StockAvailabilityResponse;
 import com.vasav.ecom.inventoryservice.dto.StockItemResponse;
 import com.vasav.ecom.inventoryservice.entity.StockItem;
 import com.vasav.ecom.inventoryservice.producer.StockLevelProducer;
@@ -13,11 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StockService {
+    // get all/one stock item, update item stock (+outbox), get availability of requested products
 
     private final StockItemRepository stockItemRepository;
     private final StockLevelProducer stockLevelProducer;
@@ -32,6 +36,17 @@ public class StockService {
     @Transactional(readOnly = true)
     public StockItemResponse get(UUID productId) {
         return StockItemResponse.from(find(productId));
+    }
+
+    //    check availability for each item requested
+    @Transactional(readOnly = true)
+    public List<StockAvailabilityResponse> availability(List<UUID> productIds) {
+        Map<UUID, Integer> available = stockItemRepository.findAllById(productIds).stream()
+                .collect(Collectors.toMap(StockItem::getProductId, StockItem::available));
+        return productIds.stream().distinct().map(id -> {
+            int qty = available.getOrDefault(id, 0);
+            return new StockAvailabilityResponse(id, qty, qty > 0);
+        }).toList();
     }
 
     //    update a stock item
