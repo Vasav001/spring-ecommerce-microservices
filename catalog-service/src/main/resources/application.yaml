@@ -67,9 +67,6 @@ spring:
             modify-topic-configs: true
 
 app:
-    #    kafka:
-    #        partitions: 6
-    #        replicas: 1
     outbox:
         poll-ms: 2000
         batch-size: 3
