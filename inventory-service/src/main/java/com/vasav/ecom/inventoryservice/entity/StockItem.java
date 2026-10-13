@@ -19,7 +19,6 @@ public class StockItem {
     @Id
     private UUID productId;
 
-    private boolean active = true;
     private int onHand;
     private int reserved;
 

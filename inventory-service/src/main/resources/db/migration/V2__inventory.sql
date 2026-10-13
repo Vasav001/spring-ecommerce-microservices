@@ -1,7 +1,6 @@
 CREATE TABLE stock_item
 (
     product_id UUID PRIMARY KEY,
-    active     BOOLEAN NOT NULL DEFAULT true,
     on_hand    INT     NOT NULL DEFAULT 0,
     reserved   INT     NOT NULL DEFAULT 0,
     CONSTRAINT stock_item_quantities CHECK (reserved >= 0 AND on_hand >= reserved)

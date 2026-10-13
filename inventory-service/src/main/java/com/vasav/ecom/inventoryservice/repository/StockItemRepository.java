@@ -13,7 +13,7 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
             update StockItem s set s.reserved = s.reserved + :qty
-            where s.productId = :productId and s.active = true and s.onHand - s.reserved >= :qty""")
+            where s.productId = :productId and s.onHand - s.reserved >= :qty""")
     int reserve(@Param("productId") UUID productId, @Param("qty") int qty);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
@@ -27,6 +27,12 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
             update StockItem s set s.onHand = s.onHand - :qty, s.reserved = s.reserved - :qty
             where s.productId = :productId and s.reserved >= :qty""")
     int confirm(@Param("productId") UUID productId, @Param("qty") int qty);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = """
+            INSERT INTO stock_item (product_id, on_hand) VALUES (:productId, :qty)
+            ON CONFLICT (product_id) DO UPDATE SET on_hand = stock_item.on_hand + EXCLUDED.on_hand""", nativeQuery = true)
+    int restock(@Param("productId") UUID productId, @Param("qty") int qty);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
