@@ -32,6 +32,13 @@ services:
 
 #   switched to free tier confluentinc cloud kafka
 
+    jaeger:
+        image: jaegertracing/jaeger:2.10.0
+        container_name: ecom-jaeger
+        ports:
+            - "16686:16686"
+            - "4318:4318"
+
     redis:
         image: redis:8.10.2-alpine
         container_name: ecom-redis
