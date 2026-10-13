@@ -71,6 +71,11 @@ outbox:
     poll-interval: 2s
     batch-size: 50
 
+inventory:
+    reservation:
+        ttl: 15m
+        expiry-interval: 30s
+
 server:
     port: 8083
 

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,15 +37,15 @@ public class StockService {
     //    update a stock item
     @Transactional
     public StockItemResponse adjust(UUID productId, int delta) {
-        boolean wasInStock = stockItemRepository.findById(productId).map(i -> i.available() > 0).orElse(false);
-        if (delta > 0) {
-            stockItemRepository.restock(productId, delta);
-        } else if (stockItemRepository.adjust(productId, delta) == 0) {
-            find(productId); // stock item may be absent
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "On hand cannot go below reserved");
-        }
-        StockItem item = find(productId);
-        stockLevelProducer.publishIfChanged(productId, wasInStock, item.available() > 0);
+        StockItem item = stockLevelProducer.publishOnFlip(List.of(productId), () -> {
+            if (delta > 0) {
+                stockItemRepository.restock(productId, delta);
+            } else if (stockItemRepository.adjust(productId, delta) == 0) {
+                find(productId); // stock item may be absent
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "On hand cannot go below reserved");
+            }
+            return find(productId);
+        });
         return StockItemResponse.from(item);
     }
 
