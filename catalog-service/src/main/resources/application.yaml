@@ -35,6 +35,8 @@ spring:
                 mechanism: PLAIN
                 jaas:
                     config: org.apache.kafka.common.security.plain.PlainLoginModule required username='${CLUSTER_API_KEY}' password='${CLUSTER_API_SECRET}';
+        admin:
+            auto-create: false
         producer:
             key-serializer: org.apache.kafka.common.serialization.StringSerializer
             value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -49,7 +51,6 @@ spring:
                 max.block.ms: 5000
                 linger.ms: 5
         consumer:
-            #            group-id: catalog-service-group
             key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
             enable-auto-commit: false
@@ -58,18 +59,18 @@ spring:
             properties:
                 max.poll.interval.ms: 300000
                 partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor
+        template:
+            observation-enabled: true
         listener:
             ack-mode: record
             concurrency: 3
-        admin:
-            auto-create: true
-            fail-fast: false
-            modify-topic-configs: true
+            observation-enabled: true
+
+outbox:
+    poll-interval: 2s
+    batch-size: 50
 
 app:
-    outbox:
-        poll-ms: 2000
-        batch-size: 3
     storage:
         provider: cloudinary
         cloudinary:
@@ -90,3 +91,16 @@ management:
         web:
             exposure:
                 include: health,info
+
+    tracing:
+        sampling:
+            probability: 1.0
+    otlp:
+        metrics:
+            export:
+                enabled: false
+    opentelemetry:
+        tracing:
+            export:
+                otlp:
+                    endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
