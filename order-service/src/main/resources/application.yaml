@@ -76,6 +76,8 @@ outbox:
     batch-size: 50
 
 order:
+    catalog:
+        url: ${CATALOG_URL:http://localhost:8082}
     cart:
         ttl: 30d
         max-items: 50

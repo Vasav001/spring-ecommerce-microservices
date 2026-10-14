@@ -5,6 +5,7 @@ public final class EventTypes {
     public static final String RESERVE_INVENTORY = "ReserveInventory";
     public static final String CONFIRM_RESERVATION = "ConfirmReservation";
     public static final String RELEASE_RESERVATION = "ReleaseReservation";
+    public static final String RETURN_RESERVATION = "ReturnReservation";
 
     public static final String INVENTORY_RESERVED = "InventoryReserved";
     public static final String INVENTORY_RESERVATION_FAILED = "InventoryReservationFailed";

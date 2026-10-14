@@ -70,19 +70,6 @@ outbox:
     poll-interval: 2s
     batch-size: 50
 
-app:
-    storage:
-        provider: cloudinary
-        cloudinary:
-            cloud-name: ${CLOUDINARY_CLOUD_NAME}
-            api-key: ${CLOUDINARY_API_KEY}
-            api-secret: ${CLOUDINARY_API_SECRET}
-    images:
-        max-per-product: 10
-        max-bytes: 5242880
-        base-urls:
-            cloudinary: https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload
-
 server:
     port: 8082
 

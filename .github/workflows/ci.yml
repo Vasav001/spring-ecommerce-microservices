@@ -1,0 +1,70 @@
+name: CI
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    -   service: catalog-service
+                        db: catalog_db
+                    -   service: customer-service
+                        db: customer_db
+                    -   service: inventory-service
+                        db: inventory_db
+                    -   service: order-service
+                        db: order_db
+                    -   service: integration-service
+                        db: integration_db
+        services:
+            postgres:
+                image: postgres:17.10-alpine
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: ${{ matrix.db }}
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U postgres"
+                    --health-interval 5s
+                    --health-timeout 3s
+                    --health-retries 10
+        env:
+            DB_URL: jdbc:postgresql://localhost:5432/${{ matrix.db }}
+            KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+            CLUSTER_API_KEY: ci
+            CLUSTER_API_SECRET: ci
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: actions/setup-java@v4
+                with:
+                    distribution: temurin
+                    java-version: 21
+                    cache: maven
+            -   run: mvn -B -f outbox-lib/pom.xml install -DskipTests
+            -   run: mvn -B -f ${{ matrix.service }}/pom.xml verify
+
+    docker:
+        needs: build
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                service: [ catalog-service, customer-service, inventory-service, order-service, integration-service ]
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: docker/setup-buildx-action@v3
+            -   uses: docker/build-push-action@v6
+                with:
+                    context: .
+                    file: docker/Dockerfile
+                    build-args: SERVICE=${{ matrix.service }}
+                    tags: ecom/${{ matrix.service }}:${{ github.sha }}
+                    push: false
+                    cache-from: type=gha,scope=${{ matrix.service }}
+                    cache-to: type=gha,mode=max,scope=${{ matrix.service }}

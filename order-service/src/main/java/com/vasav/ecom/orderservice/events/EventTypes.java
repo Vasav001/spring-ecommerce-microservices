@@ -5,6 +5,7 @@ public final class EventTypes {
     public static final String RESERVE_INVENTORY = "ReserveInventory";
     public static final String CONFIRM_RESERVATION = "ConfirmReservation";
     public static final String RELEASE_RESERVATION = "ReleaseReservation";
+    public static final String RETURN_RESERVATION = "ReturnReservation";
 
     public static final String INVENTORY_RESERVED = "InventoryReserved";
     public static final String INVENTORY_RESERVATION_FAILED = "InventoryReservationFailed";
@@ -28,6 +29,7 @@ public final class EventTypes {
 
     public static final String SHIPMENT_DISPATCHED = "ShipmentDispatched";
     public static final String SHIPMENT_DELIVERED = "ShipmentDelivered";
+    public static final String SHIPMENT_FAILED = "ShipmentFailed";
 
     private EventTypes() {
     }

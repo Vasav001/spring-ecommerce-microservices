@@ -6,6 +6,7 @@ import com.vasav.ecom.orderservice.events.EventTypes;
 import com.vasav.ecom.orderservice.events.KafkaTopics;
 import com.vasav.ecom.orderservice.events.ReleaseReservation;
 import com.vasav.ecom.orderservice.events.ReserveInventory;
+import com.vasav.ecom.orderservice.events.ReturnReservation;
 import com.vasav.ecom.outbox.OutboxService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,10 @@ public class InventoryCommandProducer {
 
     public void release(Order order) {
         send(order, EventTypes.RELEASE_RESERVATION, new ReleaseReservation(order.getId()));
+    }
+
+    public void returnToStock(Order order) {
+        send(order, EventTypes.RETURN_RESERVATION, new ReturnReservation(order.getId()));
     }
 
     private void send(Order order, String eventType, Object command) {

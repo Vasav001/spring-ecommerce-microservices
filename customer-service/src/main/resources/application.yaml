@@ -25,6 +25,9 @@ spring:
                 jwt:
                     issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/ecom-realm}
 
+customer:
+    max-addresses: 10
+
 server:
     port: 8081
 
@@ -33,3 +36,15 @@ management:
         web:
             exposure:
                 include: health,info
+    tracing:
+        sampling:
+            probability: 1.0
+    otlp:
+        metrics:
+            export:
+                enabled: false
+    opentelemetry:
+        tracing:
+            export:
+                otlp:
+                    endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}

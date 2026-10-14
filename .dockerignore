@@ -1,0 +1,8 @@
+**/target
+**/.idea
+**/*.iml
+**/HELP.md
+.git
+.github
+handoff
+docker/postgres

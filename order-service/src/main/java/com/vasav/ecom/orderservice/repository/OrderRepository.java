@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,4 +28,11 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Order o set o.status = :to, o.updatedAt = instant where o.id = :id and o.status = :from")
     int updateStatus(@Param("id") UUID id, @Param("from") OrderStatus from, @Param("to") OrderStatus to);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+            update Order o set o.status = :to, o.failureReason = :reason, o.updatedAt = instant
+            where o.id = :id and o.status in :from""")
+    int updateStatus(@Param("id") UUID id, @Param("from") Collection<OrderStatus> from, @Param("to") OrderStatus to,
+                     @Param("reason") String reason);
 }

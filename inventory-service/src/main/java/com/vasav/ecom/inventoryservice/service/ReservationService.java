@@ -99,6 +99,21 @@ public class ReservationService {
     }
 
     @Transactional
+    public void returnToStock(UUID eventId, UUID orderId) {
+        if (processedEventRepository.markProcessed(eventId, CONSUMER) == 0) {
+            return;
+        }
+        if (reservationRepository.updateStatus(orderId, ReservationStatus.CONFIRMED, ReservationStatus.RETURNED) == 0) {
+            return;
+        }
+        List<Reservation> lines = reservationRepository.findByOrderId(orderId);
+        stockLevelProducer.publishOnFlip(lines.stream().map(Reservation::getProductId).toList(), () -> {
+            lines.forEach(r -> stockItemRepository.restock(r.getProductId(), r.getQuantity()));
+            return null;
+        });
+    }
+
+    @Transactional
     public void expire(UUID orderId) {
         if (returnStock(orderId, ReservationStatus.EXPIRED)) {
             replyProducer.reply(orderId, EventTypes.RESERVATION_EXPIRED);

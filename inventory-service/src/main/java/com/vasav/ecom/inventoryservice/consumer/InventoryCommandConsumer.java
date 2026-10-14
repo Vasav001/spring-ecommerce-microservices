@@ -48,6 +48,9 @@ public class InventoryCommandConsumer {
             case EventTypes.RELEASE_RESERVATION -> reservationService.release(
                     id, jsonMapper.readValue(record.value(), ReleaseReservation.class).orderId()
             );
+            case EventTypes.RETURN_RESERVATION -> reservationService.returnToStock(
+                    id, jsonMapper.readValue(record.value(), ReturnReservation.class).orderId()
+            );
             default -> log.warn("Skipping unknown inventory command {} for key {}", eventType, record.key());
         }
     }

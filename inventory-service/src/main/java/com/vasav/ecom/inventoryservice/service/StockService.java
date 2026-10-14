@@ -49,6 +49,11 @@ public class StockService {
         }).toList();
     }
 
+    @Transactional
+    public void track(UUID productId) {
+        stockItemRepository.track(productId);
+    }
+
     //    update a stock item
     @Transactional
     public StockItemResponse adjust(UUID productId, int delta) {

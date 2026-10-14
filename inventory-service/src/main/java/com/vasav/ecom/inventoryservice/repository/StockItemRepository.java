@@ -36,6 +36,11 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
             where s.productId = :productId and s.reserved >= :qty""")
     int confirm(@Param("productId") UUID productId, @Param("qty") int qty);
 
+    @Modifying
+    @Query(value = "INSERT INTO stock_item (product_id) VALUES (:productId) ON CONFLICT (product_id) DO NOTHING",
+            nativeQuery = true)
+    int track(@Param("productId") UUID productId);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = """
             INSERT INTO stock_item (product_id, on_hand) VALUES (:productId, :qty)

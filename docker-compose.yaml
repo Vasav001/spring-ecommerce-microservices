@@ -1,3 +1,11 @@
+x-app-env: &app-env
+    KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    CLUSTER_API_KEY: ${CLUSTER_API_KEY}
+    CLUSTER_API_SECRET: ${CLUSTER_API_SECRET}
+    JWT_ISSUER_URI: http://localhost:8080/realms/ecom-realm
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/ecom-realm/protocol/openid-connect/certs
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+
 services:
     postgres:
         image: postgres:17.10-alpine
@@ -11,6 +19,11 @@ services:
         volumes:
             - postgres_data:/var/lib/postgresql/data
             - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+        healthcheck:
+            test: [ "CMD", "pg_isready", "-U", "postgres" ]
+            interval: 5s
+            timeout: 3s
+            retries: 10
 
     keycloak:
         image: quay.io/keycloak/keycloak:26.8.0
@@ -45,6 +58,91 @@ services:
         command: [ "redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "volatile-lru" ]
         ports:
             - "6380:6379"
+
+    customer-service:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                SERVICE: customer-service
+        container_name: ecom-customer
+        environment:
+            <<: *app-env
+            DB_URL: jdbc:postgresql://postgres:5432/customer_db
+        ports:
+            - "8081:8081"
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    catalog-service:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                SERVICE: catalog-service
+        container_name: ecom-catalog
+        environment:
+            <<: *app-env
+            DB_URL: jdbc:postgresql://postgres:5432/catalog_db
+        ports:
+            - "8082:8082"
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    inventory-service:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                SERVICE: inventory-service
+        container_name: ecom-inventory
+        environment:
+            <<: *app-env
+            DB_URL: jdbc:postgresql://postgres:5432/inventory_db
+        ports:
+            - "8083:8083"
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    order-service:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                SERVICE: order-service
+        container_name: ecom-order
+        environment:
+            <<: *app-env
+            DB_URL: jdbc:postgresql://postgres:5432/order_db
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+            CATALOG_URL: http://catalog-service:8082
+        ports:
+            - "8084:8084"
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_started
+
+    integration-service:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                SERVICE: integration-service
+        container_name: ecom-integration
+        environment:
+            <<: *app-env
+            DB_URL: jdbc:postgresql://postgres:5432/integration_db
+        ports:
+            - "8086:8086"
+        depends_on:
+            postgres:
+                condition: service_healthy
 
 volumes:
     postgres_data:
