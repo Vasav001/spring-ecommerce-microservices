@@ -5,6 +5,7 @@ import com.vasav.ecom.inventoryservice.dto.StockItemResponse;
 import com.vasav.ecom.inventoryservice.service.StockService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,17 +25,18 @@ public class AdminInventoryController {
     private final StockService stockService;
 
     @GetMapping
-    public PagedModel<StockItemResponse> list(Pageable pageable) {
-        return new PagedModel<>(stockService.list(pageable));
+    public ResponseEntity<PagedModel<StockItemResponse>> list(Pageable pageable) {
+        return ResponseEntity.ok(new PagedModel<>(stockService.list(pageable)));
     }
 
     @GetMapping("/{productId}")
-    public StockItemResponse get(@PathVariable UUID productId) {
-        return stockService.get(productId);
+    public ResponseEntity<StockItemResponse> get(@PathVariable UUID productId) {
+        return ResponseEntity.ok(stockService.get(productId));
     }
 
     @PostMapping("/{productId}/adjustments")
-    public StockItemResponse adjust(@PathVariable UUID productId, @Valid @RequestBody AdjustStockRequest request) {
-        return stockService.adjust(productId, request.delta());
+    public ResponseEntity<StockItemResponse> adjust(@PathVariable UUID productId,
+                                                    @Valid @RequestBody AdjustStockRequest request) {
+        return ResponseEntity.ok(stockService.adjust(productId, request.delta()));
     }
 }

@@ -19,6 +19,11 @@ spring:
             - classpath:db/migration
         validate-on-migrate: true
 
+    data:
+        redis:
+            host: ${REDIS_HOST:localhost}
+            port: ${REDIS_PORT:6380}
+
     security:
         oauth2:
             resourceserver:
@@ -69,6 +74,13 @@ spring:
 outbox:
     poll-interval: 2s
     batch-size: 50
+
+order:
+    cart:
+        ttl: 30d
+        max-items: 50
+    saga:
+        step-timeout: 2m
 
 server:
     port: 8084

@@ -3,6 +3,7 @@ package com.vasav.ecom.inventoryservice.controller;
 import com.vasav.ecom.inventoryservice.dto.StockAvailabilityResponse;
 import com.vasav.ecom.inventoryservice.service.StockService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +24,10 @@ public class InventoryController {
     private final StockService stockService;
 
     @GetMapping
-    public List<StockAvailabilityResponse> availability(@RequestParam List<UUID> productIds) {
+    public ResponseEntity<List<StockAvailabilityResponse>> availability(@RequestParam List<UUID> productIds) {
         if (productIds.isEmpty() || productIds.size() > MAX_PRODUCTS) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "productIds must have 1 to " + MAX_PRODUCTS + " ids");
         }
-        return stockService.availability(productIds);
+        return ResponseEntity.ok(stockService.availability(productIds));
     }
 }
