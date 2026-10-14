@@ -5,6 +5,9 @@ x-app-env: &app-env
     JWT_ISSUER_URI: http://localhost:8080/realms/ecom-realm
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/ecom-realm/protocol/openid-connect/certs
     OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+    CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+    CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+    CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
 
 services:
     postgres:
@@ -144,6 +147,24 @@ services:
         depends_on:
             postgres:
                 condition: service_healthy
+
+    proxy:
+        image: nginx:1.27.5-alpine
+        container_name: ecom-proxy
+        ports:
+            - "8000:80"
+        volumes:
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+    swagger-ui:
+        image: swaggerapi/swagger-ui:v5.17.14
+        container_name: ecom-swagger
+        environment:
+            BASE_URL: /swagger
+            URLS: >-
+                [{"name":"customer","url":"/docs/customer"},{"name":"catalog","url":"/docs/catalog"},
+                {"name":"inventory","url":"/docs/inventory"},{"name":"order","url":"/docs/order"},
+                {"name":"integration","url":"/docs/integration"},{"name":"search","url":"/docs/search"}]
 
     search-service:
         build:

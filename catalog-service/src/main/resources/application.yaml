@@ -70,7 +70,15 @@ outbox:
     poll-interval: 2s
     batch-size: 50
 
+images:
+    url-prefix: https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME:}/
+
+springdoc:
+    api-docs:
+        path: /docs/catalog
+
 server:
+    forward-headers-strategy: framework
     port: 8082
 
 management:

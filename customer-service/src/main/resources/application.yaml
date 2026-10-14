@@ -28,7 +28,15 @@ spring:
 customer:
     max-addresses: 10
 
+images:
+    url-prefix: https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME:}/
+
+springdoc:
+    api-docs:
+        path: /docs/customer
+
 server:
+    forward-headers-strategy: framework
     port: 8081
 
 management:

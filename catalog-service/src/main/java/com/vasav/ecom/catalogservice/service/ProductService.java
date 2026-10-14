@@ -7,6 +7,7 @@ import com.vasav.ecom.catalogservice.entity.enums.ProductStatus;
 import com.vasav.ecom.catalogservice.producer.ProductEventProducer;
 import com.vasav.ecom.catalogservice.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,12 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductEventProducer productEvents;
 
+    @Value("${images.url-prefix}")
+    private String imageUrlPrefix;
+
     @Transactional
     public ProductResponse create(ProductRequest request) {
+        checkImageUrl(request.imageUrl());
         Product product = new Product();
         product.setId(UUID.randomUUID());
         request.applyTo(product);
@@ -37,6 +42,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponse update(UUID id, ProductRequest request) {
+        checkImageUrl(request.imageUrl());
         Product product = find(id);
         request.applyTo(product);
         product = productRepository.saveAndFlush(product);
@@ -68,6 +74,12 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<ProductResponse> lookup(Collection<UUID> ids) {
         return productRepository.findAllById(ids).stream().map(ProductResponse::from).toList();
+    }
+
+    private void checkImageUrl(String imageUrl) {
+        if (imageUrl != null && !imageUrl.startsWith(imageUrlPrefix)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "imageUrl must start with " + imageUrlPrefix);
+        }
     }
 
     private Product find(UUID id) {

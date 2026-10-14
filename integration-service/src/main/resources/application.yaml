@@ -70,7 +70,17 @@ outbox:
     poll-interval: 2s
     batch-size: 50
 
+cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+    api-key: ${CLOUDINARY_API_KEY:}
+    api-secret: ${CLOUDINARY_API_SECRET:}
+
+springdoc:
+    api-docs:
+        path: /docs/integration
+
 server:
+    forward-headers-strategy: framework
     port: 8086
 
 management:

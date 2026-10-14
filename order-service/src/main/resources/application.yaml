@@ -85,7 +85,12 @@ order:
         step-timeout: 10m
         timeout-check-interval: 30s
 
+springdoc:
+    api-docs:
+        path: /docs/order
+
 server:
+    forward-headers-strategy: framework
     port: 8084
 
 management:

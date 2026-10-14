@@ -76,7 +76,12 @@ inventory:
         ttl: 15m
         expiry-interval: 30s
 
+springdoc:
+    api-docs:
+        path: /docs/inventory
+
 server:
+    forward-headers-strategy: framework
     port: 8083
 
 management:

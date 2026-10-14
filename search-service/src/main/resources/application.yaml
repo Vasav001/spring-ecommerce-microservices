@@ -75,7 +75,12 @@ outbox:
     poll-interval: 2s
     batch-size: 50
 
+springdoc:
+    api-docs:
+        path: /docs/search
+
 server:
+    forward-headers-strategy: framework
     port: 8085
 
 management:

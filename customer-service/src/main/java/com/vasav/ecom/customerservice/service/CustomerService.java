@@ -27,6 +27,9 @@ public class CustomerService {
     @Value("${customer.max-addresses:10}")
     private int maxAddresses;
 
+    @Value("${images.url-prefix}")
+    private String imageUrlPrefix;
+
     @Transactional
     public ProfileResponse get(String customerId) {
         return ProfileResponse.from(load(customerId), addressRepository.findByCustomerIdOrderByCreatedAt(customerId));
@@ -34,6 +37,10 @@ public class CustomerService {
 
     @Transactional
     public ProfileResponse update(String customerId, ProfileRequest request) {
+        String url = request.profilePictureUrl();
+        if (url != null && !url.startsWith(imageUrlPrefix)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "profilePictureUrl must start with " + imageUrlPrefix);
+        }
         Customer customer = load(customerId);
         customer.setProfilePictureUrl(request.profilePictureUrl());
         customerRepository.saveAndFlush(customer);
