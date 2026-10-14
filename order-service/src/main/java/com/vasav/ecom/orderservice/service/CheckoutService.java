@@ -36,7 +36,7 @@ public class CheckoutService {
     private final OrderSagaRepository orderSagaRepository;
     private final InventoryCommandProducer inventoryCommandProducer;
 
-    @Value("${order.saga.step-timeout:2m}")
+    @Value("${order.saga.step-timeout:10m}")
     private Duration stepTimeout;
 
     public record Result(OrderResponse order, boolean created) {

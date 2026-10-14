@@ -23,6 +23,11 @@ public final class EventTypes {
 
     public static final String ORDER_CONFIRMED = "OrderConfirmed";
     public static final String ORDER_FAILED = "OrderFailed";
+    public static final String ORDER_SHIPPED = "OrderShipped";
+    public static final String ORDER_DELIVERED = "OrderDelivered";
+
+    public static final String SHIPMENT_DISPATCHED = "ShipmentDispatched";
+    public static final String SHIPMENT_DELIVERED = "ShipmentDelivered";
 
     private EventTypes() {
     }

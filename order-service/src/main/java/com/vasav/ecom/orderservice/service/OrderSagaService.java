@@ -42,7 +42,7 @@ public class OrderSagaService {
     private final PaymentCommandProducer paymentCommands;
     private final OrderEventProducer orderEvents;
 
-    @Value("${order.saga.step-timeout:2m}")
+    @Value("${order.saga.step-timeout:10m}")
     private Duration stepTimeout;
 
     @Transactional

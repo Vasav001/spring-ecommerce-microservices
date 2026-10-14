@@ -80,7 +80,7 @@ order:
         ttl: 30d
         max-items: 50
     saga:
-        step-timeout: 2m
+        step-timeout: 10m
         timeout-check-interval: 30s
 
 server:

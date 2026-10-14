@@ -5,7 +5,9 @@ import com.vasav.ecom.orderservice.entity.Order;
 import com.vasav.ecom.orderservice.events.EventTypes;
 import com.vasav.ecom.orderservice.events.KafkaTopics;
 import com.vasav.ecom.orderservice.events.OrderConfirmed;
+import com.vasav.ecom.orderservice.events.OrderDelivered;
 import com.vasav.ecom.orderservice.events.OrderFailed;
+import com.vasav.ecom.orderservice.events.OrderShipped;
 import com.vasav.ecom.outbox.OutboxService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,14 @@ public class OrderEventProducer {
 
     public void failed(Order order) {
         send(order, EventTypes.ORDER_FAILED, new OrderFailed(order.getId(), order.getCustomerId(), order.getFailureReason()));
+    }
+
+    public void shipped(Order order) {
+        send(order, EventTypes.ORDER_SHIPPED, new OrderShipped(order.getId(), order.getCustomerId()));
+    }
+
+    public void delivered(Order order) {
+        send(order, EventTypes.ORDER_DELIVERED, new OrderDelivered(order.getId(), order.getCustomerId()));
     }
 
     private void send(Order order, String eventType, Object event) {
