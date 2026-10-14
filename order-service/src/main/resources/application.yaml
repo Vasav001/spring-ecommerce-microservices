@@ -81,6 +81,7 @@ order:
         max-items: 50
     saga:
         step-timeout: 2m
+        timeout-check-interval: 30s
 
 server:
     port: 8084
