@@ -28,7 +28,7 @@ services:
     keycloak:
         image: quay.io/keycloak/keycloak:26.8.0
         container_name: ecom-keycloak
-        command: start-dev # --import-realm
+        command: start-dev --import-realm
         environment:
             KC_BOOTSTRAP_ADMIN_USERNAME: admin
             KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -39,9 +39,10 @@ services:
         ports:
             - "8080:8080"
         depends_on:
-            - postgres
-    #        volumes:
-    #            - ./docker/keycloak:/opt/keycloak/data/import
+            postgres:
+                condition: service_healthy
+        volumes:
+            - ./docker/keycloak:/opt/keycloak/data/import
 
 #   switched to free tier confluentinc cloud kafka
 
@@ -140,6 +141,22 @@ services:
             DB_URL: jdbc:postgresql://postgres:5432/integration_db
         ports:
             - "8086:8086"
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    search-service:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            args:
+                SERVICE: search-service
+        container_name: ecom-search
+        environment:
+            <<: *app-env
+            DB_URL: jdbc:postgresql://postgres:5432/search_db
+        ports:
+            - "8085:8085"
         depends_on:
             postgres:
                 condition: service_healthy
