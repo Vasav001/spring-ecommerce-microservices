@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+*.iml
+.env
+.env.*
+!.env.example
+!frontend/.env
+**/target
+**/node_modules
+frontend/dist
+frontend/.env.local
+handoff
+k8s/secrets.env
+k8s/.rendered
+openapi
+notes.md

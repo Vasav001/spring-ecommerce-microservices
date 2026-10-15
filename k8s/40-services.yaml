@@ -1,0 +1,371 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-service
+  namespace: ecom
+spec:
+  selector:
+    app: customer-service
+  ports:
+    - port: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-service
+  namespace: ecom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer-service
+  template:
+    metadata:
+      labels:
+        app: customer-service
+    spec:
+      containers:
+        - name: customer-service
+          image: __IMAGE_REPO__/customer-service:__TAG__
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: ecom-config
+            - secretRef:
+                name: ecom-secrets
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/customer_db
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 320Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-service
+  namespace: ecom
+spec:
+  selector:
+    app: catalog-service
+  ports:
+    - port: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+  namespace: ecom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      containers:
+        - name: catalog-service
+          image: __IMAGE_REPO__/catalog-service:__TAG__
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: ecom-config
+            - secretRef:
+                name: ecom-secrets
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/catalog_db
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 320Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-service
+  namespace: ecom
+spec:
+  selector:
+    app: inventory-service
+  ports:
+    - port: 8083
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: ecom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-service
+  template:
+    metadata:
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+        - name: inventory-service
+          image: __IMAGE_REPO__/inventory-service:__TAG__
+          ports:
+            - containerPort: 8083
+          envFrom:
+            - configMapRef:
+                name: ecom-config
+            - secretRef:
+                name: ecom-secrets
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/inventory_db
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8083
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 320Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: ecom
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 8084
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: ecom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: __IMAGE_REPO__/order-service:__TAG__
+          ports:
+            - containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: ecom-config
+            - secretRef:
+                name: ecom-secrets
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/order_db
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8084
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8084
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8084
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 320Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-service
+  namespace: ecom
+spec:
+  selector:
+    app: search-service
+  ports:
+    - port: 8085
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+  namespace: ecom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-service
+  template:
+    metadata:
+      labels:
+        app: search-service
+    spec:
+      containers:
+        - name: search-service
+          image: __IMAGE_REPO__/search-service:__TAG__
+          ports:
+            - containerPort: 8085
+          envFrom:
+            - configMapRef:
+                name: ecom-config
+            - secretRef:
+                name: ecom-secrets
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/search_db
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8085
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8085
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8085
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 320Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: integration-service
+  namespace: ecom
+spec:
+  selector:
+    app: integration-service
+  ports:
+    - port: 8086
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: integration-service
+  namespace: ecom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: integration-service
+  template:
+    metadata:
+      labels:
+        app: integration-service
+    spec:
+      containers:
+        - name: integration-service
+          image: __IMAGE_REPO__/integration-service:__TAG__
+          ports:
+            - containerPort: 8086
+          envFrom:
+            - configMapRef:
+                name: ecom-config
+            - secretRef:
+                name: ecom-secrets
+          env:
+            - name: DB_URL
+              value: jdbc:postgresql://postgres:5432/integration_db
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8086
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8086
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8086
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 320Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi

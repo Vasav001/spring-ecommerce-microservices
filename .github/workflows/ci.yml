@@ -52,6 +52,36 @@ jobs:
             -   run: mvn -B -f outbox-lib/pom.xml install -DskipTests
             -   run: mvn -B -f ${{ matrix.service }}/pom.xml verify
 
+    frontend:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: frontend
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: actions/setup-node@v4
+                with:
+                    node-version: 22
+                    cache: npm
+                    cache-dependency-path: frontend/package-lock.json
+            -   run: npm ci
+            -   run: npm run lint
+            -   run: npm run build
+
+    frontend-docker:
+        needs: frontend
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+            -   uses: docker/setup-buildx-action@v3
+            -   uses: docker/build-push-action@v6
+                with:
+                    context: frontend
+                    tags: ecom/frontend:${{ github.sha }}
+                    push: false
+                    cache-from: type=gha,scope=frontend
+                    cache-to: type=gha,mode=max,scope=frontend
+
     docker:
         needs: build
         runs-on: ubuntu-latest

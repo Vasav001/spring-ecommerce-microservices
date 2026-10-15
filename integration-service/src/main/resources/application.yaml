@@ -76,6 +76,7 @@ cloudinary:
     api-secret: ${CLOUDINARY_API_SECRET:}
 
 springdoc:
+    default-produces-media-type: application/json
     api-docs:
         path: /docs/integration
 

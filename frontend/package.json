@@ -1,0 +1,42 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:mock": "concurrently -k -n vite,mock \"vite --mode mock\" \"npm:mock\"",
+    "mock": "concurrently -k -n customer,catalog,inventory,order,search,integration \"prism mock -d -p 4011 ../openapi/customer.json\" \"prism mock -d -p 4012 ../openapi/catalog.json\" \"prism mock -d -p 4013 ../openapi/inventory.json\" \"prism mock -d -p 4014 ../openapi/order.json\" \"prism mock -d -p 4015 ../openapi/search.json\" \"prism mock -d -p 4016 ../openapi/integration.json\"",
+    "gen:api": "openapi-typescript ../openapi/customer.json -o src/api/schema/customer.ts && openapi-typescript ../openapi/catalog.json -o src/api/schema/catalog.ts && openapi-typescript ../openapi/inventory.json -o src/api/schema/inventory.ts && openapi-typescript ../openapi/order.json -o src/api/schema/order.ts && openapi-typescript ../openapi/search.json -o src/api/schema/search.ts && openapi-typescript ../openapi/integration.json -o src/api/schema/integration.ts",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.104.3",
+    "oidc-client-ts": "^3.5.0",
+    "openapi-fetch": "^0.17.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-oidc-context": "^3.3.1",
+    "react-router": "^7.18.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@stoplight/prism-cli": "^5.14.2",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.2.5",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "openapi-typescript": "^7.13.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5"
+  }
+}

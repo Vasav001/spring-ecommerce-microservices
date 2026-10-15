@@ -1,0 +1,50 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: ecom-cert
+  namespace: ecom
+spec:
+  domains:
+    - __DOMAIN__
+---
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: ecom-https-redirect
+  namespace: ecom
+spec:
+  redirectToHttps:
+    enabled: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ecom
+  namespace: ecom
+  annotations:
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.global-static-ip-name: ecom-ip
+    networking.gke.io/managed-certificates: ecom-cert
+    networking.gke.io/v1beta1.FrontendConfig: ecom-https-redirect
+spec:
+  rules:
+    - http:
+        paths:
+          - { path: /auth, pathType: Prefix, backend: { service: { name: keycloak, port: { number: 8080 } } } }
+          - { path: /api/v1/customers, pathType: Prefix, backend: { service: { name: customer-service, port: { number: 8081 } } } }
+          - { path: /api/v1/products, pathType: Prefix, backend: { service: { name: catalog-service, port: { number: 8082 } } } }
+          - { path: /api/v1/reviews, pathType: Prefix, backend: { service: { name: catalog-service, port: { number: 8082 } } } }
+          - { path: /api/v1/admin/products, pathType: Prefix, backend: { service: { name: catalog-service, port: { number: 8082 } } } }
+          - { path: /api/v1/inventory, pathType: Prefix, backend: { service: { name: inventory-service, port: { number: 8083 } } } }
+          - { path: /api/v1/admin/inventory, pathType: Prefix, backend: { service: { name: inventory-service, port: { number: 8083 } } } }
+          - { path: /api/v1/cart, pathType: Prefix, backend: { service: { name: order-service, port: { number: 8084 } } } }
+          - { path: /api/v1/checkout, pathType: Prefix, backend: { service: { name: order-service, port: { number: 8084 } } } }
+          - { path: /api/v1/orders, pathType: Prefix, backend: { service: { name: order-service, port: { number: 8084 } } } }
+          - { path: /api/v1/admin/orders, pathType: Prefix, backend: { service: { name: order-service, port: { number: 8084 } } } }
+          - { path: /api/v1/search, pathType: Prefix, backend: { service: { name: search-service, port: { number: 8085 } } } }
+          - { path: /api/v1/payments, pathType: Prefix, backend: { service: { name: integration-service, port: { number: 8086 } } } }
+          - { path: /api/v1/shipments, pathType: Prefix, backend: { service: { name: integration-service, port: { number: 8086 } } } }
+          - { path: /api/v1/uploads, pathType: Prefix, backend: { service: { name: integration-service, port: { number: 8086 } } } }
+          - { path: /api/v1/admin/shipments, pathType: Prefix, backend: { service: { name: integration-service, port: { number: 8086 } } } }
+          - { path: /api/v1/admin/uploads, pathType: Prefix, backend: { service: { name: integration-service, port: { number: 8086 } } } }
+          - { path: /, pathType: Prefix, backend: { service: { name: frontend, port: { number: 80 } } } }

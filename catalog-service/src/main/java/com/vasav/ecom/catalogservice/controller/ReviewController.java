@@ -6,6 +6,7 @@ import com.vasav.ecom.catalogservice.security.CurrentUser;
 import com.vasav.ecom.catalogservice.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +29,13 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping("/api/v1/reviews")
-    public ResponseEntity<PagedModel<ReviewResponse>> list(@RequestParam UUID productId, Pageable pageable) {
+    public ResponseEntity<PagedModel<ReviewResponse>> list(@RequestParam UUID productId, @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(new PagedModel<>(reviewService.list(productId, pageable)));
+    }
+
+    @GetMapping("/api/v1/reviews/mine")
+    public ResponseEntity<ReviewResponse> mine(@AuthenticationPrincipal Jwt jwt, @RequestParam UUID productId) {
+        return ResponseEntity.ok(reviewService.mine(CurrentUser.from(jwt), productId));
     }
 
     @PutMapping("/api/v1/products/{productId}/review")

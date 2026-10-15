@@ -5,6 +5,7 @@ import com.vasav.ecom.searchservice.dto.SearchResult;
 import com.vasav.ecom.searchservice.service.SearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,8 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping
-    public ResponseEntity<PagedModel<SearchResult>> search(@Valid @ModelAttribute SearchFilter filter, Pageable pageable) {
+    public ResponseEntity<PagedModel<SearchResult>> search(@Valid @ParameterObject @ModelAttribute SearchFilter filter,
+                                                           @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(new PagedModel<>(searchService.search(filter, pageable)));
     }
 }

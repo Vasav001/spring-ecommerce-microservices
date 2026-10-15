@@ -1,0 +1,34 @@
+x-prod-auth: &prod-auth
+    JWT_ISSUER_URI: ${PUBLIC_URL:-http://localhost:8000}/auth/realms/ecom-realm
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/ecom-realm/protocol/openid-connect/certs
+
+services:
+    keycloak:
+        command: start --import-realm
+        environment:
+            KC_HOSTNAME: ${PUBLIC_URL:-http://localhost:8000}/auth
+            KC_HTTP_RELATIVE_PATH: /auth
+            KC_HTTP_ENABLED: "true"
+            KC_PROXY_HEADERS: xforwarded
+            KC_HEALTH_ENABLED: "true"
+            PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8000}
+            ECOM_TEST_CLIENT_ENABLED: "false"
+
+    frontend:
+        image: ecom-frontend:prod
+        build:
+            args:
+                VITE_KEYCLOAK_URL: ${PUBLIC_URL:-http://localhost:8000}/auth/realms/ecom-realm
+
+    customer-service:
+        environment: *prod-auth
+    catalog-service:
+        environment: *prod-auth
+    inventory-service:
+        environment: *prod-auth
+    order-service:
+        environment: *prod-auth
+    integration-service:
+        environment: *prod-auth
+    search-service:
+        environment: *prod-auth

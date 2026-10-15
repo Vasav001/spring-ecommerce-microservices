@@ -13,11 +13,11 @@ public record OrderResponse(
         OrderStatus status,
         String failureReason,
         BigDecimal totalAmount,
-        List<Item> items,
+        List<OrderLine> items,
         ShippingAddress shippingAddress,
         Instant createdAt
 ) {
-    public record Item(
+    public record OrderLine(
             UUID productId,
             String productName,
             BigDecimal unitPrice,
@@ -32,7 +32,7 @@ public record OrderResponse(
                 order.getFailureReason(),
                 order.getTotalAmount(),
                 order.getItems().stream()
-                        .map(i -> new Item(i.getProductId(), i.getProductName(), i.getUnitPrice(), i.getQuantity()))
+                        .map(i -> new OrderLine(i.getProductId(), i.getProductName(), i.getUnitPrice(), i.getQuantity()))
                         .toList(),
                 ShippingAddress.from(order),
                 order.getCreatedAt()

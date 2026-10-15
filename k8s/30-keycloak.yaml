@@ -1,0 +1,110 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: keycloak
+  namespace: ecom
+spec:
+  healthCheck:
+    type: HTTP
+    port: 8080
+    requestPath: /auth/realms/ecom-realm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: ecom
+  annotations:
+    cloud.google.com/backend-config: '{"default": "keycloak"}'
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: ecom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.8.0
+          args: [ "start", "--import-realm" ]
+          ports:
+            - containerPort: 8080
+            - containerPort: 9000
+          env:
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres:5432/keycloak
+            - name: KC_DB_USERNAME
+              value: postgres
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecom-secrets
+                  key: DB_PASSWORD
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              value: admin
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_HOSTNAME
+              value: https://__DOMAIN__/auth
+            - name: KC_HTTP_RELATIVE_PATH
+              value: /auth
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_PROXY_HEADERS
+              value: xforwarded
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: JAVA_OPTS_KC_HEAP
+              value: -Xms64m -Xmx512m
+            - name: PUBLIC_URL
+              value: https://__DOMAIN__
+            - name: ECOM_TEST_CLIENT_ENABLED
+              value: "false"
+          startupProbe:
+            httpGet:
+              path: /auth/health/started
+              port: 9000
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /auth/health/ready
+              port: 9000
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /auth/health/live
+              port: 9000
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 640Mi
+              cpu: 200m
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: realm
+              mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: realm
+          configMap:
+            name: keycloak-realm

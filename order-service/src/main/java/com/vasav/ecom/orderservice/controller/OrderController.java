@@ -4,6 +4,7 @@ import com.vasav.ecom.orderservice.dto.OrderResponse;
 import com.vasav.ecom.orderservice.security.CurrentUser;
 import com.vasav.ecom.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -24,7 +25,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping
-    public ResponseEntity<PagedModel<OrderResponse>> list(@AuthenticationPrincipal Jwt jwt, Pageable pageable) {
+    public ResponseEntity<PagedModel<OrderResponse>> list(@AuthenticationPrincipal Jwt jwt, @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(new PagedModel<>(orderService.list(CurrentUser.from(jwt).subject(), pageable)));
     }
 

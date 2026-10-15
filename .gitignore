@@ -5,6 +5,9 @@ Thumbs.db
 *.log
 .env
 .env.*
+!.env.example
+!frontend/.env
+!frontend/.env.mock
 
 target/
 out/
@@ -12,3 +15,5 @@ build/
 
 notes.md
 handoff
+k8s/secrets.env
+k8s/.rendered/

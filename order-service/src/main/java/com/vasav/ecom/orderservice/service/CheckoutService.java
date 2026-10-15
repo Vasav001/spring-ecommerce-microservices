@@ -49,18 +49,18 @@ public class CheckoutService {
             return new Result(OrderResponse.from(existing.get()), false);
         }
 
-        List<CartResponse.Item> cart = cartService.get(customerId).items();
+        List<CartResponse.CartItem> cart = cartService.get(customerId).items();
         if (cart.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
         }
 
-        Map<UUID, CatalogProduct> products = catalogClient.getProducts(cart.stream().map(CartResponse.Item::productId).toList());
+        Map<UUID, CatalogProduct> products = catalogClient.getProducts(cart.stream().map(CartResponse.CartItem::productId).toList());
         Order order = new Order();
         order.setCustomerId(customerId);
         order.setIdempotencyKey(idempotencyKey);
         address.applyTo(order);
         BigDecimal total = BigDecimal.ZERO;
-        for (CartResponse.Item item : cart) {
+        for (CartResponse.CartItem item : cart) {
             CatalogProduct product = products.get(item.productId());
             if (product == null || !product.active()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product " + item.productId() + " is not available");

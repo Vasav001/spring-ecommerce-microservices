@@ -1,0 +1,42 @@
+substitutions:
+  _REGION: asia-south1
+  _TAG: latest
+  _PUBLIC_URL: https://example.com
+
+options:
+  env: [ "DOCKER_BUILDKIT=1" ]
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: 3600s
+
+steps:
+  - id: customer-service
+    name: gcr.io/cloud-builders/docker
+    args: [ "build", "-f", "docker/Dockerfile", "--build-arg", "SERVICE=customer-service", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/customer-service:${_TAG}", "." ]
+  - id: catalog-service
+    name: gcr.io/cloud-builders/docker
+    args: [ "build", "-f", "docker/Dockerfile", "--build-arg", "SERVICE=catalog-service", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/catalog-service:${_TAG}", "." ]
+  - id: inventory-service
+    name: gcr.io/cloud-builders/docker
+    args: [ "build", "-f", "docker/Dockerfile", "--build-arg", "SERVICE=inventory-service", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/inventory-service:${_TAG}", "." ]
+  - id: order-service
+    name: gcr.io/cloud-builders/docker
+    args: [ "build", "-f", "docker/Dockerfile", "--build-arg", "SERVICE=order-service", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/order-service:${_TAG}", "." ]
+  - id: search-service
+    name: gcr.io/cloud-builders/docker
+    args: [ "build", "-f", "docker/Dockerfile", "--build-arg", "SERVICE=search-service", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/search-service:${_TAG}", "." ]
+  - id: integration-service
+    name: gcr.io/cloud-builders/docker
+    args: [ "build", "-f", "docker/Dockerfile", "--build-arg", "SERVICE=integration-service", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/integration-service:${_TAG}", "." ]
+  - id: frontend
+    name: gcr.io/cloud-builders/docker
+    args: [ "build", "--build-arg", "VITE_KEYCLOAK_URL=${_PUBLIC_URL}/auth/realms/ecom-realm", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/frontend:${_TAG}", "frontend" ]
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/customer-service:${_TAG}
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/catalog-service:${_TAG}
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/inventory-service:${_TAG}
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/order-service:${_TAG}
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/search-service:${_TAG}
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/integration-service:${_TAG}
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/ecom/frontend:${_TAG}

@@ -3,6 +3,7 @@ package com.vasav.ecom.catalogservice.controller;
 import com.vasav.ecom.catalogservice.dto.ProductResponse;
 import com.vasav.ecom.catalogservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<PagedModel<ProductResponse>> list(Pageable pageable) {
+    public ResponseEntity<PagedModel<ProductResponse>> list(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(new PagedModel<>(productService.listActive(pageable)));
     }
 

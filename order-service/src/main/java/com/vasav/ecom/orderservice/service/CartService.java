@@ -28,8 +28,8 @@ public class CartService {
     // list of items(product id and quantity) in a customer's cart
     public CartResponse get(String customerId) {
         return new CartResponse(hash().entries(key(customerId)).entrySet().stream()
-                .map(e -> new CartResponse.Item(UUID.fromString(e.getKey()), Integer.parseInt(e.getValue())))
-                .sorted(Comparator.comparing(CartResponse.Item::productId))
+                .map(e -> new CartResponse.CartItem(UUID.fromString(e.getKey()), Integer.parseInt(e.getValue())))
+                .sorted(Comparator.comparing(CartResponse.CartItem::productId))
                 .toList());
     }
 

@@ -32,6 +32,12 @@ public class ReviewService {
         return reviewRepository.findByProductIdOrderByCreatedAtDesc(productId, pageable).map(ReviewResponse::from);
     }
 
+    @Transactional(readOnly = true)
+    public ReviewResponse mine(CurrentUser user, UUID productId) {
+        return reviewRepository.findByProductIdAndCustomerId(productId, user.subject()).map(ReviewResponse::from)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+    }
+
     @Transactional
     public ReviewResponse upsert(CurrentUser user, UUID productId, ReviewRequest request) {
         lockProduct(productId);

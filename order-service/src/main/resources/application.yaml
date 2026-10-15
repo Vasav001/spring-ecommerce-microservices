@@ -86,6 +86,7 @@ order:
         timeout-check-interval: 30s
 
 springdoc:
+    default-produces-media-type: application/json
     api-docs:
         path: /docs/order
 

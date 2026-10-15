@@ -5,6 +5,7 @@ import com.vasav.ecom.inventoryservice.dto.StockItemResponse;
 import com.vasav.ecom.inventoryservice.service.StockService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -25,7 +26,7 @@ public class AdminInventoryController {
     private final StockService stockService;
 
     @GetMapping
-    public ResponseEntity<PagedModel<StockItemResponse>> list(Pageable pageable) {
+    public ResponseEntity<PagedModel<StockItemResponse>> list(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(new PagedModel<>(stockService.list(pageable)));
     }
 

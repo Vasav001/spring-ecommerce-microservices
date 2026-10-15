@@ -76,6 +76,7 @@ outbox:
     batch-size: 50
 
 springdoc:
+    default-produces-media-type: application/json
     api-docs:
         path: /docs/search
 

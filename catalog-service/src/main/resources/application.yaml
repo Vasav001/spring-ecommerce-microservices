@@ -74,6 +74,7 @@ images:
     url-prefix: https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME:}/
 
 springdoc:
+    default-produces-media-type: application/json
     api-docs:
         path: /docs/catalog
 

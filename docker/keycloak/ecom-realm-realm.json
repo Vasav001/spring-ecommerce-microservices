@@ -591,7 +591,7 @@
     "id" : "9a1ff558-ca99-4c3a-bc20-5ff06a6f0f9b",
     "clientId" : "ecom-test",
     "surrogateAuthRequired" : false,
-    "enabled" : true,
+    "enabled" : "${ECOM_TEST_CLIENT_ENABLED:true}",
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
     "redirectUris" : [ ],
@@ -612,6 +612,29 @@
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
     "nodeReRegistrationTimeout" : -1,
+    "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "basic", "email" ],
+    "optionalClientScopes" : [ "address", "phone", "offline_access", "organization", "microprofile-jwt" ]
+  }, {
+    "clientId" : "ecom-web",
+    "name" : "ecom web frontend",
+    "enabled" : true,
+    "redirectUris" : [ "http://localhost:5173/*", "${PUBLIC_URL:http://localhost:8000}/*" ],
+    "webOrigins" : [ "http://localhost:5173", "${PUBLIC_URL:http://localhost:8000}" ],
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : true,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : false,
+    "serviceAccountsEnabled" : false,
+    "publicClient" : true,
+    "frontchannelLogout" : true,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "realm_client" : "false",
+      "pkce.code.challenge.method" : "S256",
+      "post.logout.redirect.uris" : "http://localhost:5173/*##${PUBLIC_URL:http://localhost:8000}/*"
+    },
+    "fullScopeAllowed" : true,
     "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "basic", "email" ],
     "optionalClientScopes" : [ "address", "phone", "offline_access", "organization", "microprofile-jwt" ]
   }, {

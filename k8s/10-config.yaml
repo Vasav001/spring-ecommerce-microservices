@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecom-config
+  namespace: ecom
+data:
+  PUBLIC_URL: https://__DOMAIN__
+  JWT_ISSUER_URI: https://__DOMAIN__/auth/realms/ecom-realm
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/ecom-realm/protocol/openid-connect/certs
+  DB_USERNAME: postgres
+  JAVA_TOOL_OPTIONS: -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.0"
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  CATALOG_URL: http://catalog-service:8082

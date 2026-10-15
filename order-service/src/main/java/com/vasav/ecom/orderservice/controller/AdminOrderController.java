@@ -4,6 +4,7 @@ import com.vasav.ecom.orderservice.dto.OrderResponse;
 import com.vasav.ecom.orderservice.entity.enums.OrderStatus;
 import com.vasav.ecom.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class AdminOrderController {
 
     @GetMapping
     public ResponseEntity<PagedModel<OrderResponse>> list(@RequestParam(required = false) OrderStatus status,
-                                                          Pageable pageable) {
+                                                          @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(new PagedModel<>(orderService.listAll(status, pageable)));
     }
 
