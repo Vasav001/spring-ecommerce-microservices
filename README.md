@@ -87,7 +87,9 @@ API docs for each service are at `/docs/<service>` behind the proxy.
 GitHub Actions (`.github/workflows/ci.yml`):
 - runs `mvn verify` for each service against a Postgres container;
 - lints and builds the frontend;
-- builds every Docker image (without pushing).
+- builds every Docker image.
+
+On `main` it also pushes the images and deploys to GKE (see [k8s/README.md](k8s/README.md#auto-deploy-from-main)).
 
 ## Deploy (GKE)
 

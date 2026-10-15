@@ -28,4 +28,4 @@ kubectl -n ecom create configmap postgres-init \
 kubectl -n ecom create configmap keycloak-realm \
   --from-file=ecom-realm-realm.json=../docker/keycloak/ecom-realm-realm.json --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f "$out"
-./reset-admin1.sh
+bash reset-admin1.sh

@@ -74,3 +74,20 @@ gcloud compute addresses delete ecom-ip --global
 ```
 
 Deleting the cluster ends Postgres; its disk can be left behind, so check Compute Engine → Disks and delete any leftover `pvc-...` disk.
+
+## Auto-deploy from main
+
+Pushes to any branch run CI only. A push to `main` also pushes the images to Artifact Registry (tagged with the commit sha) and runs `deploy.sh` on the cluster.
+
+One-time setup:
+
+1. `bash k8s/setup-github-deploy.sh` creates a keyless GitHub → Google Cloud login, limited to this repo's `main` branch.
+2. In GitHub → Settings → Secrets and variables → Actions, add a secret named `SECRETS_ENV` and paste the whole content of `k8s/secrets.env` into it.
+
+## Wiping data
+
+- **Shop data only:** `bash k8s/wipe-data.sh` empties every service database and Redis. Keycloak users stay.
+- **Everything, including Keycloak users:**
+  1. `kubectl -n ecom delete statefulset postgres`
+  2. `kubectl -n ecom delete pvc data-postgres-0`
+  3. Run `deploy.sh` again, then `kubectl -n ecom rollout restart deploy`. Keycloak reimports the realm, and `admin1` is the only user again.
