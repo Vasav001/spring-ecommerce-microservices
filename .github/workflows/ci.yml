@@ -86,6 +86,7 @@ jobs:
         needs: build
         runs-on: ubuntu-latest
         strategy:
+            fail-fast: false
             matrix:
                 service: [ catalog-service, customer-service, inventory-service, order-service, integration-service, search-service ]
         steps:
