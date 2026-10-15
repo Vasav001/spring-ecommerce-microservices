@@ -86,6 +86,7 @@ jobs:
     frontend-docker:
         needs: frontend
         runs-on: ubuntu-latest
+        timeout-minutes: 20
         steps:
             -   uses: actions/checkout@v4
             -   uses: docker/setup-buildx-action@v3
@@ -114,6 +115,7 @@ jobs:
     docker:
         needs: build
         runs-on: ubuntu-latest
+        timeout-minutes: 20
         strategy:
             fail-fast: false
             matrix:
@@ -148,6 +150,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         needs: [ docker, frontend-docker ]
         runs-on: ubuntu-latest
+        timeout-minutes: 30
         concurrency: deploy
         steps:
             -   uses: actions/checkout@v4
