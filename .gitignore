@@ -15,5 +15,6 @@ build/
 
 notes.md
 handoff
+notes/
 k8s/secrets.env
 k8s/.rendered/
