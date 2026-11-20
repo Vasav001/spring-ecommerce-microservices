@@ -2,14 +2,9 @@
 
 An event-driven online shop: six Spring Boot services that talk over Kafka, an orchestrated order saga, Keycloak for login and a React frontend.
 
-**Live:** https://34-8-188-125.sslip.io
+It ran on GKE with Kafka on Confluent Cloud. That deployment is now shut down; the [screenshots](#screenshots) are from it.
 
-> **Screenshots coming soon**
-> - Shop / search page
-> - Product page with reviews
-> - Checkout and dummy payment
-> - Order tracking
-> - Admin: products, stock and shipments
+![Shop](docs/screenshots/01-shop-search.png)
 
 ## Tech stack
 
@@ -71,6 +66,10 @@ Solid arrows are REST calls; dotted arrows are Kafka messages:
 | payment.replies | integration | order |
 | shipment.events | integration | order |
 
+A `catalog.products` event in Confluent Cloud, sent through the outbox after an admin created a product:
+
+![Kafka topic message in Confluent Cloud](docs/screenshots/19-kafka-topic-message.png)
+
 **Customers** register through Keycloak, then:
 1. Browse and search products.
 2. Add products to their cart and check out with one of their saved addresses.
@@ -131,6 +130,14 @@ sequenceDiagram
 - **Backstop:** inventory also expires a reservation that hasn't been confirmed after 15 minutes, so stock is never stuck.
 - **Shipment fails (admin):** this can happen after confirmation. The order fails, the payment is refunded, and the stock is returned.
 
+| Payment declined | Order failed, stock released |
+|---|---|
+| ![Payment declined](docs/screenshots/07-payment-declined.png) | ![Order failed after payment](docs/screenshots/08-order-failed-payment.png) |
+
+Ordering more than is in stock fails at the first step (on a phone):
+
+<img src="docs/screenshots/14-mobile-order-failed-out-of-stock.png" alt="Order failed: insufficient stock" width="320">
+
 ### Why it's safe
 
 - **Transactional outbox:** every command and event is saved in the same database transaction as the change that caused it. A poller (`outbox-lib`) then sends it to Kafka, so nothing is lost or sent for a change that rolled back.
@@ -138,6 +145,42 @@ sequenceDiagram
 - **Guarded transitions:** a step only moves forward if the order is still on the step the reply expects (for example, `PROCESSING_PAYMENT → CONFIRMING_INVENTORY`). Late or duplicate replies are ignored.
 - **Ordering:** messages are keyed by order id, so each order's messages are handled in order.
 - **Idempotent checkout:** checkout takes an idempotency key, so a double-clicked "Place order" creates one order.
+
+## Screenshots
+
+### Shopping
+
+| Product page | Cart |
+|---|---|
+| ![Product page](docs/screenshots/02-product-page.png) | ![Cart](docs/screenshots/03-cart.png) |
+
+| Checkout | Profile and saved addresses |
+|---|---|
+| ![Checkout](docs/screenshots/04-checkout.png) | ![Profile](docs/screenshots/05-profile-addresses.png) |
+
+### An order going through the saga
+
+| 1. Reserving stock | 2. Payment succeeded |
+|---|---|
+| ![Reserving stock](docs/screenshots/06-order-reserving-stock.png) | ![Payment succeeded](docs/screenshots/09-payment-succeeded.png) |
+
+| 3. Confirmed, shipment created | 4. Admin dispatches it |
+|---|---|
+| ![Order confirmed](docs/screenshots/10-order-confirmed-shipment-created.png) | ![Shipment dispatched](docs/screenshots/11-admin-shipment-dispatched.png) |
+
+| 5. Admin marks it delivered | 6. Customer's order list |
+|---|---|
+| ![Shipment delivered](docs/screenshots/12-admin-shipment-delivered.png) | ![My orders](docs/screenshots/13-my-orders.png) |
+
+### Admin
+
+| Products | Edit product and adjust stock |
+|---|---|
+| ![Admin products](docs/screenshots/15-admin-products.png) | ![Edit product and stock](docs/screenshots/16-admin-edit-product-stock.png) |
+
+| Inventory | All orders |
+|---|---|
+| ![Admin inventory](docs/screenshots/17-admin-inventory.png) | ![Admin orders](docs/screenshots/18-admin-orders.png) |
 
 ## Run locally
 
